@@ -2,6 +2,39 @@
 
 declare(strict_types=1);
 
+(function (): void {
+    $envPath = __DIR__ . '/../.env';
+    if (!is_file($envPath)) {
+        return;
+    }
+    $lines = file($envPath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) ?: [];
+    foreach ($lines as $line) {
+        $line = trim($line);
+        if ($line === '' || strpos($line, '#') === 0) {
+            continue;
+        }
+        if (strpos($line, '=') === false) {
+            continue;
+        }
+        [$name, $value] = explode('=', $line, 2);
+        $name = trim($name);
+        $value = trim($value, " \t\"'");
+        if ($name !== '') {
+            putenv("$name=$value");
+            $_ENV[$name] = $value;
+        }
+    }
+    if (getenv('DATABASE_URL') === false || getenv('DATABASE_URL') === '') {
+        $host = getenv('DATABASE_HOST') ?: 'localhost';
+        $port = getenv('DATABASE_PORT') ?: '3307';
+        $name = getenv('DATABASE_NAME') ?: 'ludoplanet';
+        $user = getenv('DATABASE_USER') ?: 'root';
+        $pass = getenv('DATABASE_PASSWORD') ?: 'root';
+        putenv("DATABASE_URL=mysql://$user:$pass@$host:$port/$name");
+        $_ENV['DATABASE_URL'] = "mysql://$user:$pass@$host:$port/$name";
+    }
+})();
+
 set_time_limit(0);
 ob_implicit_flush(true);
 

@@ -1,10 +1,66 @@
 <?php
 declare(strict_types=1);
 
+(function (): void {
+    $envPath = __DIR__ . '/../.env';
+    if (!is_file($envPath)) {
+        return;
+    }
+    $lines = file($envPath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) ?: [];
+    foreach ($lines as $line) {
+        $line = trim($line);
+        if ($line === '' || strpos($line, '#') === 0) {
+            continue;
+        }
+        if (strpos($line, '=') === false) {
+            continue;
+        }
+        [$name, $value] = explode('=', $line, 2);
+        $name = trim($name);
+        $value = trim($value, " \t\"'");
+        if ($name !== '') {
+            putenv("$name=$value");
+            $_ENV[$name] = $value;
+        }
+    }
+    if (getenv('DATABASE_URL') === false || getenv('DATABASE_URL') === '') {
+        $host = getenv('DATABASE_HOST') ?: 'localhost';
+        $port = getenv('DATABASE_PORT') ?: '3307';
+        $name = getenv('DATABASE_NAME') ?: 'ludoplanet';
+        $user = getenv('DATABASE_USER') ?: 'root';
+        $pass = getenv('DATABASE_PASSWORD') ?: 'root';
+        putenv("DATABASE_URL=mysql://$user:$pass@$host:$port/$name");
+        $_ENV['DATABASE_URL'] = "mysql://$user:$pass@$host:$port/$name";
+    }
+})();
+
 function usage(): void
 {
     $script = basename(__FILE__);
-    fwrite(STDERR, "Usage: php {$script} /path/to/bgg_dataset.csv\n");
+    fwrite(STDERR, "Usage: php {$script} /path/to/bgg_dataset.csv [--limit-per-category=20]\n");
+}
+
+/** @return array{0: string, 1: int} [csvPath, limitPerCategory] */
+function parseArgs(array $argv): array
+{
+    $limitPerCategory = 0;
+    $csvPath = '';
+    for ($i = 1; $i < count($argv); $i++) {
+        $arg = $argv[$i];
+        if (str_starts_with($arg, '--limit-per-category=')) {
+            $limitPerCategory = (int) substr($arg, 21);
+            $limitPerCategory = $limitPerCategory > 0 ? $limitPerCategory : 0;
+        } elseif ($arg !== '' && $csvPath === '') {
+            $csvPath = $arg;
+        }
+    }
+    return [$csvPath, $limitPerCategory];
+}
+
+/** Catégories attendues (ordre pour savoir quand arrêter) */
+function getExpectedCategories(): array
+{
+    return ['enfants', "jeux d'ambiance", 'jeux de cartes', "jeux d'expert", 'jeux de plateau'];
 }
 
 function parseDatabaseUrl(string $databaseUrl): array
@@ -106,10 +162,15 @@ if ($argc < 2) {
     exit(1);
 }
 
-$csvPath = $argv[1];
-if (!is_file($csvPath)) {
-    fwrite(STDERR, "Fichier introuvable: {$csvPath}\n");
+[$csvPath, $limitPerCategory] = parseArgs($argv);
+if ($csvPath === '' || !is_file($csvPath)) {
+    fwrite(STDERR, "Fichier CSV introuvable ou non fourni: " . ($csvPath ?: '(vide)') . "\n");
+    usage();
     exit(1);
+}
+
+if ($limitPerCategory > 0) {
+    echo "Limite: {$limitPerCategory} jeux par catégorie.\n";
 }
 
 $databaseUrl = getenv('DATABASE_URL');
@@ -233,6 +294,8 @@ foreach ($required as $column) {
 }
 
 $rowCount = 0;
+$categoryCounts = [];
+$expectedCategories = getExpectedCategories();
 $pdo->beginTransaction();
 
 while (($row = fgetcsv($handle, 0, ';', '"', '\\')) !== false) {
@@ -244,6 +307,19 @@ while (($row = fgetcsv($handle, 0, ';', '"', '\\')) !== false) {
     $complexity = parseDecimal($row[$index['Complexity Average']] ?? null);
     $domains = splitList($row[$index['Domains']] ?? null);
     $categories = deriveCategories($domains, $complexity);
+
+    if ($limitPerCategory > 0 && $categories !== []) {
+        $allCategoriesFull = true;
+        foreach ($categories as $cat) {
+            if (($categoryCounts[$cat] ?? 0) < $limitPerCategory) {
+                $allCategoriesFull = false;
+                break;
+            }
+        }
+        if ($allCategoriesFull) {
+            continue;
+        }
+    }
 
     $insertGame->execute([
         ':bgg_id' => $bggId,
@@ -288,11 +364,26 @@ while (($row = fgetcsv($handle, 0, ';', '"', '\\')) !== false) {
             ':game_id' => $bggId,
             ':category_id' => $categoryId,
         ]);
+        $categoryCounts[$name] = ($categoryCounts[$name] ?? 0) + 1;
     }
 
     $rowCount++;
     if ($rowCount % 500 === 0) {
         echo "Importe {$rowCount} lignes...\n";
+    }
+
+    if ($limitPerCategory > 0) {
+        $allFull = true;
+        foreach ($expectedCategories as $cat) {
+            if (($categoryCounts[$cat] ?? 0) < $limitPerCategory) {
+                $allFull = false;
+                break;
+            }
+        }
+        if ($allFull) {
+            echo "Limite atteinte ({$limitPerCategory} par catégorie). Arrêt.\n";
+            break;
+        }
     }
 }
 

@@ -1,3 +1,7 @@
 @import 'tailwindcss';
 @plugin '@tailwindcss/forms';
 @plugin '@tailwindcss/typography';
+
+/* Détection explicite des classes dans src (SvelteKit) */
+@source '../**/*.svelte';
+@source '../**/*.html';
