@@ -13,7 +13,7 @@ use Symfony\Component\HttpKernel\KernelEvents;
 
 final class CorsEventSubscriber implements EventSubscriberInterface
 {
-    private const ALLOWED_ORIGINS = ['http://localhost:5173', 'http://127.0.0.1:5173'];
+    private const ALLOWED_ORIGINS = ['http://localhost:5173', 'http://127.0.0.1:5173', 'http://localhost:4173', 'http://127.0.0.1:4173'];
 
     public static function getSubscribedEvents(): array
     {

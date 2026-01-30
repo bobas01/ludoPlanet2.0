@@ -1,7 +1,7 @@
-const BASE_URL =
-	typeof import.meta.env?.VITE_API_URL === 'string'
-		? import.meta.env.VITE_API_URL.replace(/\/$/, '')
-		: 'http://localhost:8000';
+export const BASE_URL =
+	import.meta.env.MODE === 'dev'
+		? 'http://localhost:8000'
+		: 'http://localhost:9000';
 
 export const api = {
 	async get<T>(path: string): Promise<{ data: T }> {

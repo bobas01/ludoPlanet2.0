@@ -1,8 +1,8 @@
 services:
   database:
     image: mysql:8.0
-    ports:
-      - "3307:3306"
+    #ports:
+    #  - "3307:3306"
     volumes:
       - ./database:/var/lib/mysql
     environment:
