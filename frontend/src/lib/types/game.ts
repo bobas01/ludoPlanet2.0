@@ -14,4 +14,11 @@ export type Game = {
 	complexityAverage: string | null;
 	ownedUsers: number | null;
 	categories?: string[];
+	images?: GameImage[];
+	primaryImageUrl?: string | null;
+};
+
+export type GameImage = {
+	url: string;
+	isPrimary: boolean;
 };

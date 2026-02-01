@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Game;
+use App\Entity\GameImage;
 use App\Repository\GameRepository;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -16,7 +17,7 @@ final class GameController
         $games = $gameRepository->findAll();
 
         return new JsonResponse([
-            'games' => array_map(fn (Game $game) => $this->gameToArray($game), $games),
+            'games' => array_map(fn(Game $game) => $this->gameToArray($game), $games),
         ]);
     }
 
@@ -35,9 +36,24 @@ final class GameController
     private function gameToArray(Game $game): array
     {
         $categories = array_map(
-            static fn ($c) => $c->getName(),
+            static fn($c) => $c->getName(),
             $game->getCategories()->toArray()
         );
+
+        $images = [];
+        $primaryImageUrl = null;
+        foreach ($game->getImages() as $image) {
+            /** @var GameImage $image */
+            $imageUrl = $image->getImageUrl();
+            $isPrimary = $image->isPrimary();
+            $images[] = [
+                'url' => $imageUrl,
+                'isPrimary' => $isPrimary,
+            ];
+            if ($isPrimary && $primaryImageUrl === null) {
+                $primaryImageUrl = $imageUrl;
+            }
+        }
 
         return [
             'bggId' => $game->getBggId(),
@@ -55,6 +71,8 @@ final class GameController
             'complexityAverage' => $game->getComplexityAverage(),
             'ownedUsers' => $game->getOwnedUsers(),
             'categories' => array_values($categories),
+            'images' => $images,
+            'primaryImageUrl' => $primaryImageUrl,
         ];
     }
 }

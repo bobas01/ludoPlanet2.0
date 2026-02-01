@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { BASE_URL } from '$lib/api';
 	import type { Game } from '$lib/types/game';
 	import { formatPrice } from '$lib/utils/games';
 
@@ -7,6 +8,16 @@
 	};
 
 	let { game }: Props = $props();
+	const resolveImageUrl = (url: string | null) => {
+		if (!url) return null;
+		const normalized = url.startsWith('/images/categories/') ? url.replace(/\.svg$/, '.png') : url;
+		return normalized.startsWith('http') ? normalized : `${BASE_URL}${normalized}`;
+	};
+
+	const imageUrl = $derived(
+		game.primaryImageUrl ?? game.images?.find((img) => img.isPrimary)?.url ?? game.images?.[0]?.url ?? null
+	);
+	const resolvedImageUrl = $derived(resolveImageUrl(imageUrl));
 </script>
 
 <a href="/games/{game.bggId}" class="block h-full cursor-pointer">
@@ -16,13 +27,23 @@
 		<div
 			class="relative h-36 sm:h-40 bg-linear-to-br from-amber-100 via-amber-50/80 to-slate-100 flex items-center justify-center overflow-hidden"
 		>
-			<div
-				class="absolute inset-0 opacity-40 group-hover:opacity-60 transition-opacity"
-				style="background-image: url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23d97706\' fill-opacity=\'0.15\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');"
-			></div>
-			<span class="relative text-5xl sm:text-6xl opacity-80 select-none" aria-hidden="true"
-				>🎲</span
-			>
+			{#if resolvedImageUrl}
+				<img
+					class="absolute inset-0 h-full w-full object-cover"
+					src={resolvedImageUrl}
+					alt={game.name}
+					loading="lazy"
+				/>
+				<div class="absolute inset-0 bg-gradient-to-t from-slate-900/40 via-transparent to-transparent"></div>
+			{:else}
+				<div
+					class="absolute inset-0 opacity-40 group-hover:opacity-60 transition-opacity"
+					style="background-image: url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23d97706\' fill-opacity=\'0.15\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');"
+				></div>
+				<span class="relative text-5xl sm:text-6xl opacity-80 select-none" aria-hidden="true"
+					>🎲</span
+				>
+			{/if}
 		</div>
 
 		<div class="p-4 sm:p-5 flex-1 flex flex-col">
@@ -80,3 +101,5 @@
 		</div>
 	</article>
 </a>
+
+
