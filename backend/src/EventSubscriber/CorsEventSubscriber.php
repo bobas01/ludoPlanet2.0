@@ -38,6 +38,7 @@ final class CorsEventSubscriber implements EventSubscriberInterface
         $response->headers->set('Access-Control-Allow-Origin', $origin);
         $response->headers->set('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
         $response->headers->set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+        $response->headers->set('Access-Control-Allow-Credentials', 'true');
         $response->headers->set('Access-Control-Max-Age', '86400');
         $event->setResponse($response);
     }
@@ -58,6 +59,7 @@ final class CorsEventSubscriber implements EventSubscriberInterface
         $event->getResponse()->headers->set('Access-Control-Allow-Origin', $origin);
         $event->getResponse()->headers->set('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
         $event->getResponse()->headers->set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+        $event->getResponse()->headers->set('Access-Control-Allow-Credentials', 'true');
         $event->getResponse()->headers->set('Access-Control-Max-Age', '86400');
     }
 }

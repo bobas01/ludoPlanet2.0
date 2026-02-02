@@ -5,7 +5,7 @@ export const BASE_URL =
 
 export const api = {
 	async get<T>(path: string): Promise<{ data: T }> {
-		const res = await fetch(`${BASE_URL}${path}`, { credentials: 'include' });
+		const res = await fetch(`${BASE_URL}${path}`);
 		if (!res.ok) {
 			throw new Error(`API ${res.status}: ${res.statusText}`);
 		}
