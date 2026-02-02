@@ -1,0 +1,128 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Controller\Auth;
+
+use App\Entity\User;
+use App\Repository\UserRepository;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Email;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\Routing\Attribute\Route;
+
+final class RegisterController
+{
+    public function __construct(
+        private readonly UserRepository $userRepository,
+        private readonly EntityManagerInterface $entityManager,
+        private readonly UserPasswordHasherInterface $passwordHasher,
+        private readonly MailerInterface $mailer,
+        #[Autowire('%mailer_from%')]
+        private readonly string $mailerFrom
+    ) {}
+
+    #[Route('/api/register', name: 'api_register', methods: ['POST'])]
+    public function __invoke(Request $request): Response
+    {
+        $data = json_decode($request->getContent(), true);
+        if (!is_array($data)) {
+            return new JsonResponse(['error' => 'Données JSON invalides.'], Response::HTTP_BAD_REQUEST);
+        }
+
+        $email = isset($data['email']) ? trim((string) $data['email']) : '';
+        $password = isset($data['password']) ? (string) $data['password'] : '';
+        $firstName = isset($data['firstName']) ? trim((string) $data['firstName']) : '';
+        $lastName = isset($data['lastName']) ? trim((string) $data['lastName']) : '';
+        $address = isset($data['address']) ? trim((string) $data['address']) : '';
+        $phoneNumber = isset($data['phoneNumber']) ? trim((string) $data['phoneNumber']) : '';
+        $birthDateInput = isset($data['birthDate']) ? trim((string) $data['birthDate']) : '';
+
+        if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return new JsonResponse(['error' => 'Email invalide.'], Response::HTTP_BAD_REQUEST);
+        }
+
+        $allowedSpecials = '!@#$%^&*()_+-=[]{};:\'",.<>/?\\|`~';
+        if (strlen($password) < 12) {
+            return new JsonResponse([
+                'error' => 'Mot de passe trop court (12 caractères minimum).',
+            ], Response::HTTP_BAD_REQUEST);
+        }
+        if (!preg_match('/[A-Z]/', $password)) {
+            return new JsonResponse([
+                'error' => 'Le mot de passe doit contenir au moins une majuscule.',
+            ], Response::HTTP_BAD_REQUEST);
+        }
+        $specialPattern = '/[' . preg_quote($allowedSpecials, '/') . ']/';
+        if (!preg_match($specialPattern, $password)) {
+            return new JsonResponse([
+                'error' => 'Le mot de passe doit contenir au moins un caractère spécial autorisé.',
+                'allowedSpecials' => $allowedSpecials,
+            ], Response::HTTP_BAD_REQUEST);
+        }
+
+        if ($firstName === '' || $lastName === '') {
+            return new JsonResponse(['error' => 'Prénom et nom requis.'], Response::HTTP_BAD_REQUEST);
+        }
+
+        if ($address === '') {
+            return new JsonResponse(['error' => 'Adresse requise.'], Response::HTTP_BAD_REQUEST);
+        }
+
+        if ($phoneNumber === '') {
+            return new JsonResponse(['error' => 'Numéro de téléphone requis.'], Response::HTTP_BAD_REQUEST);
+        }
+
+        $birthDate = \DateTimeImmutable::createFromFormat('Y-m-d', $birthDateInput);
+        if ($birthDate === false) {
+            return new JsonResponse(['error' => 'Date de naissance invalide (YYYY-MM-DD).'], Response::HTTP_BAD_REQUEST);
+        }
+
+        $age = $birthDate->diff(new \DateTimeImmutable('today'))->y;
+        if ($age < 18) {
+            return new JsonResponse(['error' => 'Vous devez être majeur pour créer un compte.'], Response::HTTP_BAD_REQUEST);
+        }
+
+        if ($this->userRepository->findOneBy(['email' => $email]) !== null) {
+            return new JsonResponse(['error' => 'Email déjà utilisé.'], Response::HTTP_CONFLICT);
+        }
+
+        $user = new User($email, '');
+        $passwordHash = $this->passwordHasher->hashPassword($user, $password);
+        $user->setPasswordHash($passwordHash);
+        $user->setRoles(['ROLE_USER']);
+        $user->setFirstName($firstName);
+        $user->setLastName($lastName);
+        $user->setAddress($address);
+        $user->setPhoneNumber($phoneNumber);
+        $user->setBirthDate($birthDate);
+
+        $this->entityManager->persist($user);
+        $this->entityManager->flush();
+
+        $message = (new Email())
+            ->from($this->mailerFrom)
+            ->to($user->getEmail())
+            ->subject('Bienvenue sur LudoPlanet')
+            ->text('Votre compte est bien créé.');
+        $this->mailer->send($message);
+
+        return new JsonResponse([
+            'user' => [
+                'id' => $user->getId(),
+                'email' => $user->getEmail(),
+                'roles' => $user->getRoles(),
+                'firstName' => $user->getFirstName(),
+                'lastName' => $user->getLastName(),
+                'address' => $user->getAddress(),
+                'phoneNumber' => $user->getPhoneNumber(),
+                'birthDate' => $user->getBirthDate()->format('Y-m-d'),
+            ],
+        ], Response::HTTP_CREATED);
+    }
+}

@@ -8,10 +8,12 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\UserRepository;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: 'users')]
-class User
+class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -23,6 +25,21 @@ class User
 
     #[ORM\Column(name: 'password_hash', type: 'string', length: 255)]
     private string $passwordHash;
+
+    #[ORM\Column(name: 'first_name', type: 'string', length: 100)]
+    private string $firstName;
+
+    #[ORM\Column(name: 'last_name', type: 'string', length: 100)]
+    private string $lastName;
+
+    #[ORM\Column(type: 'string', length: 255)]
+    private string $address;
+
+    #[ORM\Column(name: 'phone_number', type: 'string', length: 30)]
+    private string $phoneNumber;
+
+    #[ORM\Column(name: 'birth_date', type: 'date_immutable')]
+    private \DateTimeImmutable $birthDate;
 
     #[ORM\Column(type: 'json')]
     private array $roles = [];
@@ -77,9 +94,66 @@ class User
         return $this;
     }
 
+    public function getFirstName(): string
+    {
+        return $this->firstName;
+    }
+
+    public function setFirstName(string $firstName): self
+    {
+        $this->firstName = $firstName;
+        return $this;
+    }
+
+    public function getLastName(): string
+    {
+        return $this->lastName;
+    }
+
+    public function setLastName(string $lastName): self
+    {
+        $this->lastName = $lastName;
+        return $this;
+    }
+
+    public function getAddress(): string
+    {
+        return $this->address;
+    }
+
+    public function setAddress(string $address): self
+    {
+        $this->address = $address;
+        return $this;
+    }
+
+    public function getPhoneNumber(): string
+    {
+        return $this->phoneNumber;
+    }
+
+    public function setPhoneNumber(string $phoneNumber): self
+    {
+        $this->phoneNumber = $phoneNumber;
+        return $this;
+    }
+
+    public function getBirthDate(): \DateTimeImmutable
+    {
+        return $this->birthDate;
+    }
+
+    public function setBirthDate(\DateTimeImmutable $birthDate): self
+    {
+        $this->birthDate = $birthDate;
+        return $this;
+    }
+
     public function getRoles(): array
     {
-        return $this->roles;
+        $roles = $this->roles;
+        $roles[] = 'ROLE_USER';
+        return array_values(array_unique($roles));
     }
 
     public function setRoles(array $roles): self
@@ -87,6 +161,18 @@ class User
         $this->roles = $roles;
         return $this;
     }
+
+    public function getUserIdentifier(): string
+    {
+        return $this->email;
+    }
+
+    public function getPassword(): string
+    {
+        return $this->passwordHash;
+    }
+
+    public function eraseCredentials(): void {}
 
     public function getCreatedAt(): \DateTimeImmutable
     {
