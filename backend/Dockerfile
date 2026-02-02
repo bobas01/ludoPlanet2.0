@@ -12,6 +12,6 @@ RUN composer install
 
 COPY . .
 
-EXPOSE 9000
+EXPOSE 8000
 
-CMD ["php", "-S", "0.0.0.0:9000", "-t", "public"]
+CMD ["php", "-S", "0.0.0.0:8000", "-t", "public"]

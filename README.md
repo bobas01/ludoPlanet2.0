@@ -43,7 +43,7 @@ ludoplanet/
 #### Backend (Symfony)
 
 - **Image** : `php:8.4-fpm-alpine`
-- **Port** : `9000:9000`
+- **Port** : `8000:8000`
 - **Volume** : `./backend:/app` (montage du code source)
 - **Dépendances** : Composer installé dans l'image
 - **Dockerfile** : Installation de Composer et des dépendances PHP
@@ -149,7 +149,7 @@ docker compose up
 Une fois les conteneurs démarrés :
 
 - **Frontend** : http://localhost:4173
-- **Backend** : http://localhost:9000
+- **Backend** : http://localhost:8000
 - **Database** : localhost:3307
   - Utilisateur : `root`
   - Mot de passe : `root`
@@ -191,7 +191,7 @@ ports:
 
 1. **Erreur de connexion** : Vérifiez que le conteneur database est démarré
 2. **Données perdues** : Les données sont persistées dans `./database/`. Si le dossier est supprimé, les données seront perdues
-3. **Réinitialiser la base** : 
+3. **Réinitialiser la base** :
    ```bash
    docker compose down -v
    docker compose up -d database
@@ -219,7 +219,7 @@ Si le build échoue :
 FROM php:8.4-fpm-alpine
 # Installation de Composer
 # Installation des dépendances PHP
-# Exposition du port 9000
+# Exposition du port 8000
 ```
 
 ### Frontend Dockerfile

@@ -1,8 +1,8 @@
 services:
   database:
     image: mysql:8.0
-    #ports:
-    #  - "3307:3306"
+    ports:
+      - "3307:3306"
     volumes:
       - ./database:/var/lib/mysql
     environment:
@@ -24,7 +24,7 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     ports:
-      - "9000:9000"
+      - "8000:8000"
     volumes:
       - ./backend:/app
     env_file:
@@ -43,6 +43,13 @@ services:
       MYSQL_ROOT_PASSWORD: root
     depends_on:
       - database
+    networks:
+      - app-network
+  mailpit:
+    image: axllent/mailpit:latest
+    ports:
+      - "1025:1025"
+      - "8025:8025"
     networks:
       - app-network
 
