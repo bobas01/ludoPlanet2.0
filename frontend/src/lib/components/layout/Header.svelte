@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { page } from '$app/stores';
 	import HeaderDesktop from '$lib/components/layout/HeaderDesktop.svelte';
 	import HeaderMobile from '$lib/components/layout/HeaderMobile.svelte';
 	import HeaderCarousel from '$lib/components/layout/HeaderCarousel.svelte';
@@ -25,10 +26,13 @@
 
 	const mobileMenuItems = menuItems;
 
-	let isAuthenticated = $state(false);
+	import { authUser } from '$lib/stores/auth';
+
+	let isAuthenticated = $derived(!!$authUser);
 	let cartCount = $state(0);
 	let carouselIndex = $state(0);
 	const carouselImages = [carouselPublicitaire1, carouselPublicitaire3, carouselPublicitaire2];
+	const showCarousel = $derived($page.url.pathname === '/');
 
 	onMount(() => {
 		const interval = setInterval(() => {
@@ -43,29 +47,33 @@
 </script>
 
 <HeaderDesktop
-	bgHeader={bgHeader}
-	logoLudo={logoLudo}
-	loupe={loupe}
-	logoConnectionBois={logoConnectionBois}
-	panier={panier}
-	menuItems={menuItems}
-	isAuthenticated={isAuthenticated}
-	cartCount={cartCount}
+	{bgHeader}
+	{logoLudo}
+	{loupe}
+	{logoConnectionBois}
+	{panier}
+	{menuItems}
+	{isAuthenticated}
+	{cartCount}
 	onSearch={handleSearch}
 />
 
-<HeaderCarousel class="hidden lg:block" image={carouselImages[carouselIndex]} />
+{#if showCarousel}
+	<HeaderCarousel class="hidden lg:block" image={carouselImages[carouselIndex]} />
+{/if}
 
 <HeaderMobile
-	bgHeaderPhone={bgHeaderPhone}
-	logoLudo={logoLudo}
-	loupe={loupe}
-	panier={panier}
-	burger={burger}
+	{bgHeaderPhone}
+	{logoLudo}
+	{loupe}
+	{panier}
+	{burger}
 	menuItems={mobileMenuItems}
-	isAuthenticated={isAuthenticated}
-	cartCount={cartCount}
+	{isAuthenticated}
+	{cartCount}
 	onSearch={handleSearch}
 />
 
-<HeaderCarousel class="lg:hidden" image={carouselImages[carouselIndex]} />
+{#if showCarousel}
+	<HeaderCarousel class="lg:hidden" image={carouselImages[carouselIndex]} />
+{/if}

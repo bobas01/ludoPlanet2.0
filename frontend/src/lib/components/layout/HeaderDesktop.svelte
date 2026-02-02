@@ -21,6 +21,10 @@
 		onSearch: (event: Event) => void;
 	};
 
+	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
+	import { logout } from '$lib/stores/auth';
+
 	let {
 		bgHeader,
 		logoLudo,
@@ -32,6 +36,15 @@
 		cartCount,
 		onSearch
 	}: Props = $props();
+
+	const redirectTarget = $derived(`${$page.url.pathname}${$page.url.search}`);
+	const goToLogin = () => goto(`/login?redirect=${encodeURIComponent(redirectTarget)}`);
+	const goToRegister = () => goto(`/register?redirect=${encodeURIComponent(redirectTarget)}`);
+	const goToProfile = () => goto('/me');
+	const handleLogout = async () => {
+		await logout();
+		await goto('/');
+	};
 </script>
 
 <header class="hidden text-white lg:block">
@@ -43,9 +56,7 @@
 						<img class="h-[100px] w-[100px]" src={logoLudo} alt="Logo" />
 					</a>
 					<div class="leading-tight">
-						<p class="font-body text-sm text-white/90">
-							pour s'évader le temps d'une partie...
-						</p>
+						<p class="font-body text-sm text-white/90">pour s'évader le temps d'une partie...</p>
 					</div>
 				</div>
 
@@ -69,7 +80,7 @@
 						<DropdownMenuTrigger class="relative">
 							<img class="h-[100px] w-[100px]" src={logoConnectionBois} alt="Compte" />
 							{#if isAuthenticated}
-								<span class="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-green-500"></span>
+								<span class="absolute right-1 bottom-1 h-3 w-3 rounded-full bg-green-500"></span>
 							{/if}
 						</DropdownMenuTrigger>
 						<DropdownMenuContent
@@ -77,11 +88,19 @@
 							align="end"
 						>
 							{#if isAuthenticated}
-								<DropdownMenuItem class="cursor-pointer">Mes infos</DropdownMenuItem>
-								<DropdownMenuItem class="cursor-pointer">Se déconnecter</DropdownMenuItem>
+								<DropdownMenuItem class="cursor-pointer" onSelect={goToProfile}>
+									Mes infos
+								</DropdownMenuItem>
+								<DropdownMenuItem class="cursor-pointer" onSelect={handleLogout}>
+									Se déconnecter
+								</DropdownMenuItem>
 							{:else}
-								<DropdownMenuItem class="cursor-pointer">Connexion</DropdownMenuItem>
-								<DropdownMenuItem class="cursor-pointer">Inscription</DropdownMenuItem>
+								<DropdownMenuItem class="cursor-pointer" onSelect={goToLogin}>
+									Connexion
+								</DropdownMenuItem>
+								<DropdownMenuItem class="cursor-pointer" onSelect={goToRegister}>
+									Inscription
+								</DropdownMenuItem>
 							{/if}
 						</DropdownMenuContent>
 					</DropdownMenu>
@@ -115,3 +134,12 @@
 		</nav>
 	</div>
 </header>
+
+<style>
+	.bottom-1 {
+		bottom: 35px;
+	}
+	.right-1 {
+		right: 25px;
+	}
+</style>

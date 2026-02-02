@@ -1,10 +1,16 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import favicon from '$lib/assets/favicon.png';
 	import Header from '$lib/components/layout/Header.svelte';
 	import './layout.css';
 	import Footer from '$lib/components/layout/Footer.svelte';
+	import { loadMe } from '$lib/stores/auth';
 
 	let { children } = $props();
+
+	onMount(() => {
+		loadMe();
+	});
 </script>
 
 <svelte:head><link rel="icon" href={favicon} /></svelte:head>

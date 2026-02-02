@@ -22,6 +22,10 @@
 		onSearch: (event: Event) => void;
 	};
 
+	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
+	import { logout } from '$lib/stores/auth';
+
 	let {
 		bgHeaderPhone,
 		logoLudo,
@@ -33,6 +37,15 @@
 		cartCount,
 		onSearch
 	}: Props = $props();
+
+	const redirectTarget = $derived(`${$page.url.pathname}${$page.url.search}`);
+	const goToLogin = () => goto(`/login?redirect=${encodeURIComponent(redirectTarget)}`);
+	const goToRegister = () => goto(`/register?redirect=${encodeURIComponent(redirectTarget)}`);
+	const goToProfile = () => goto('/me');
+	const handleLogout = async () => {
+		await logout();
+		await goto('/');
+	};
 </script>
 
 <header class="text-white lg:hidden">
@@ -62,11 +75,19 @@
 							align="end"
 						>
 							{#if isAuthenticated}
-								<DropdownMenuItem class="cursor-pointer">Mes infos</DropdownMenuItem>
-								<DropdownMenuItem class="cursor-pointer">Se déconnecter</DropdownMenuItem>
+								<DropdownMenuItem class="cursor-pointer" onSelect={goToProfile}>
+									Mes infos
+								</DropdownMenuItem>
+								<DropdownMenuItem class="cursor-pointer" onSelect={handleLogout}>
+									Se déconnecter
+								</DropdownMenuItem>
 							{:else}
-								<DropdownMenuItem class="cursor-pointer">Connexion</DropdownMenuItem>
-								<DropdownMenuItem class="cursor-pointer">Inscription</DropdownMenuItem>
+								<DropdownMenuItem class="cursor-pointer" onSelect={goToLogin}>
+									Connexion
+								</DropdownMenuItem>
+								<DropdownMenuItem class="cursor-pointer" onSelect={goToRegister}>
+									Inscription
+								</DropdownMenuItem>
 							{/if}
 							<DropdownMenuSeparator />
 							{#each menuItems as item}
