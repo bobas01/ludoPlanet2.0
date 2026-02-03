@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
 	import { api } from '$lib/api';
 	import GameCard from '$lib/components/games/GameCard.svelte';
 	import GamesFilters from '$lib/components/games/GamesFilters.svelte';
@@ -16,19 +18,20 @@
 	let sortBy = $state<SortOption>('rating');
 	let currentPage = $state(1);
 
+	$effect(() => {
+		const categoryParam = $page.url.searchParams.get('category');
+		selectedCategory = categoryParam;
+	});
+
 	let categories = $derived(
-		Array.from(new Set(games.flatMap((g) => g.categories ?? []))).sort((a, b) =>
-			a.localeCompare(b)
-		)
+		Array.from(new Set(games.flatMap((g) => g.categories ?? []))).sort((a, b) => a.localeCompare(b))
 	);
 
 	let filteredAndSortedGames = $derived(
 		(() => {
 			let list = games;
 			if (selectedCategory) {
-				list = list.filter((g) =>
-					(g.categories ?? []).includes(selectedCategory as string)
-				);
+				list = list.filter((g) => (g.categories ?? []).includes(selectedCategory as string));
 			}
 			return [...list].sort((a, b) => {
 				if (sortBy === 'players') {
@@ -51,14 +54,9 @@
 		})()
 	);
 
-	let totalPages = $derived(
-		Math.max(1, Math.ceil(filteredAndSortedGames.length / PAGE_SIZE))
-	);
+	let totalPages = $derived(Math.max(1, Math.ceil(filteredAndSortedGames.length / PAGE_SIZE)));
 	let paginatedGames = $derived(
-		filteredAndSortedGames.slice(
-			(currentPage - 1) * PAGE_SIZE,
-			currentPage * PAGE_SIZE
-		)
+		filteredAndSortedGames.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE)
 	);
 
 	$effect(() => {
@@ -89,24 +87,40 @@
 	function handleNext() {
 		currentPage = Math.min(totalPages, currentPage + 1);
 	}
+
+	function setCategory(cat: string | null) {
+		selectedCategory = cat;
+		const url = new URL($page.url);
+		if (cat) {
+			url.searchParams.set('category', cat);
+		} else {
+			url.searchParams.delete('category');
+		}
+		const query = url.searchParams.toString();
+		goto(query ? `${url.pathname}?${query}` : url.pathname, {
+			replaceState: true,
+			keepFocus: true,
+			noScroll: true
+		});
+	}
 </script>
 
 {#if loading}
 	<div class="flex items-center justify-center py-24">
 		<div class="flex flex-col items-center gap-4">
 			<div
-				class="w-10 h-10 border-2 border-amber-500/30 border-t-amber-500 rounded-full animate-spin"
+				class="h-10 w-10 animate-spin rounded-full border-2 border-amber-500/30 border-t-amber-500"
 			></div>
 			<p class="text-slate-500">Chargement des jeux…</p>
 		</div>
 	</div>
 {:else if error}
-	<div class="rounded-2xl bg-red-50 border border-red-100 px-6 py-4 text-red-700">
+	<div class="rounded-2xl border border-red-100 bg-red-50 px-6 py-4 text-red-700">
 		{error}
 	</div>
 {:else if games.length === 0}
 	<div
-		class="rounded-2xl bg-slate-50 border border-slate-200 px-6 py-12 text-center text-slate-500"
+		class="rounded-2xl border border-slate-200 bg-slate-50 px-6 py-12 text-center text-slate-500"
 	>
 		Aucun jeu pour le moment.
 	</div>
@@ -115,13 +129,13 @@
 		{categories}
 		{selectedCategory}
 		{sortBy}
-		onCategorySelect={(cat) => (selectedCategory = cat)}
+		onCategorySelect={(cat) => setCategory(cat)}
 		onSortChange={(s) => (sortBy = s)}
 	/>
 
 	{#if filteredAndSortedGames.length === 0}
 		<div
-			class="rounded-2xl bg-slate-50 border border-slate-200 px-6 py-12 text-center text-slate-500"
+			class="rounded-2xl border border-slate-200 bg-slate-50 px-6 py-12 text-center text-slate-500"
 		>
 			Aucun jeu dans cette catégorie.
 		</div>
@@ -129,7 +143,7 @@
 		<p class="mb-4 text-sm text-slate-500">
 			{filteredAndSortedGames.length} jeu(x) — page {currentPage} / {totalPages}
 		</p>
-		<ul class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-8">
+		<ul class="grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-8 lg:grid-cols-3 xl:grid-cols-4">
 			{#each paginatedGames as game (game.bggId)}
 				<li>
 					<GameCard {game} />
@@ -137,11 +151,6 @@
 			{/each}
 		</ul>
 
-		<GamesPagination
-			{currentPage}
-			{totalPages}
-			onPrev={handlePrev}
-			onNext={handleNext}
-		/>
+		<GamesPagination {currentPage} {totalPages} onPrev={handlePrev} onNext={handleNext} />
 	{/if}
 {/if}

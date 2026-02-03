@@ -8,7 +8,7 @@
 
 <button
 	onclick={backToList}
-	class="cursor-pointer mb-6 text-sm font-medium text-amber-600 hover:text-amber-700 flex items-center gap-1"
+	class="mb-6 flex cursor-pointer items-center gap-1 text-sm font-medium text-[var(--brand-accent)] hover:text-[var(--brand-accent)]/90"
 >
 	← Retour aux jeux
 </button>

@@ -14,7 +14,7 @@
 		type="button"
 		onclick={onPrev}
 		disabled={currentPage <= 1}
-		class="cursor-pointer rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+		class="cursor-pointer rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:border-[var(--brand-accent)] hover:bg-slate-50 hover:text-[var(--brand-accent)] disabled:cursor-not-allowed disabled:opacity-50"
 	>
 		← Précédent
 	</button>
@@ -25,7 +25,7 @@
 		type="button"
 		onclick={onNext}
 		disabled={currentPage >= totalPages}
-		class="cursor-pointer rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+		class="cursor-pointer rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:border-[var(--brand-accent)] hover:bg-slate-50 hover:text-[var(--brand-accent)] disabled:cursor-not-allowed disabled:opacity-50"
 	>
 		Suivant →
 	</button>

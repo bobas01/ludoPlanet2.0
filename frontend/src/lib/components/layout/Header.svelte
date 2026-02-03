@@ -17,19 +17,19 @@
 
 	const menuItems = [
 		{ label: 'Tous les jeux', href: '/games' },
-		{ label: 'Enfants', href: '/children' },
-		{ label: "Jeux d'ambiance", href: '/ambiance' },
-		{ label: 'Jeux de plateau', href: '/plateau' },
-		{ label: 'Jeux de cartes', href: '/cards' },
-		{ label: "Jeux d'expert", href: '/expert' }
+		{ label: 'Enfants', href: '/games?category=enfants' },
+		{ label: "Jeux d'ambiance", href: '/games?category=jeux%20d%27ambiance' },
+		{ label: 'Jeux de plateau', href: '/games?category=jeux%20de%20plateau' },
+		{ label: 'Jeux de cartes', href: '/games?category=jeux%20de%20cartes' },
+		{ label: "Jeux d'expert", href: '/games?category=jeux%20d%27expert' }
 	];
 
 	const mobileMenuItems = menuItems;
 
 	import { authUser } from '$lib/stores/auth';
+	import { cartCount } from '$lib/stores/cart';
 
 	let isAuthenticated = $derived(!!$authUser);
-	let cartCount = $state(0);
 	let carouselIndex = $state(0);
 	const carouselImages = [carouselPublicitaire1, carouselPublicitaire3, carouselPublicitaire2];
 	const showCarousel = $derived($page.url.pathname === '/');
@@ -54,7 +54,7 @@
 	{panier}
 	{menuItems}
 	{isAuthenticated}
-	{cartCount}
+	cartCount={$cartCount}
 	onSearch={handleSearch}
 />
 
@@ -70,7 +70,7 @@
 	{burger}
 	menuItems={mobileMenuItems}
 	{isAuthenticated}
-	{cartCount}
+	cartCount={$cartCount}
 	onSearch={handleSearch}
 />
 

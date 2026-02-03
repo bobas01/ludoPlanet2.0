@@ -60,7 +60,7 @@
 						<img class="h-[36px] w-[36px]" src={panier} alt="Panier" />
 						{#if cartCount > 0}
 							<span
-								class="absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-[var(--brand-accent)] text-[11px] font-semibold"
+								class="absolute top-[25px] -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-[var(--brand-accent)] text-[11px] font-semibold"
 							>
 								{cartCount}
 							</span>

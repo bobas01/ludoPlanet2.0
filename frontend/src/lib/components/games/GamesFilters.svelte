@@ -15,15 +15,16 @@
 </script>
 
 <div
-	class="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 rounded-xl bg-white/80 border border-slate-200/80 p-4 shadow-sm"
+	class="mb-8 flex flex-col gap-4 rounded-xl border border-slate-200/80 bg-white/80 p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between"
 >
 	<div class="flex flex-wrap items-center gap-2">
 		<span class="text-sm font-medium text-slate-600">Catégorie :</span>
 		<button
 			type="button"
 			onclick={() => onCategorySelect(null)}
-			class="cursor-pointer rounded-full px-3 py-1.5 text-sm font-medium transition-colors {selectedCategory === null
-				? 'bg-amber-500 text-white'
+			class="cursor-pointer rounded-full px-3 py-1.5 text-sm font-medium transition-colors {selectedCategory ===
+			null
+				? 'bg-[var(--brand-accent)] text-white'
 				: 'bg-slate-100 text-slate-600 hover:bg-slate-200'}"
 		>
 			Toutes
@@ -32,8 +33,9 @@
 			<button
 				type="button"
 				onclick={() => onCategorySelect(cat)}
-				class="cursor-pointer rounded-full px-3 py-1.5 text-sm font-medium transition-colors {selectedCategory === cat
-					? 'bg-amber-500 text-white'
+				class="cursor-pointer rounded-full px-3 py-1.5 text-sm font-medium transition-colors {selectedCategory ===
+				cat
+					? 'bg-[var(--brand-accent)] text-white'
 					: 'bg-slate-100 text-slate-600 hover:bg-slate-200'}"
 			>
 				{labelCategory(cat)}
@@ -46,7 +48,7 @@
 			id="sort"
 			value={sortBy}
 			onchange={(e) => onSortChange((e.currentTarget.value as SortOption) || 'rating')}
-			class="cursor-pointer rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+			class="cursor-pointer rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm focus:border-[var(--brand-accent)] focus:ring-1 focus:ring-[var(--brand-accent)] focus:outline-none"
 		>
 			<option value="rating">Note</option>
 			<option value="players">Nombre de joueurs</option>
