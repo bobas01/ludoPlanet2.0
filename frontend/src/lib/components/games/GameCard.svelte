@@ -43,7 +43,7 @@
 
 	const goToCart = () => {
 		showCartAlert = false;
-		goto('/card');
+		goto('/cart');
 	};
 
 	$effect(() => {

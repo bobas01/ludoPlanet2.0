@@ -105,7 +105,7 @@
 						</DropdownMenuContent>
 					</DropdownMenu>
 
-					<a class="relative" href="/card">
+					<a class="relative" href="/cart">
 						<img class="mb-[13px] h-[40px] w-[40px]" src={panier} alt="Panier" />
 						{#if cartCount > 0}
 							<span

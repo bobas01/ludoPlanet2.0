@@ -56,7 +56,7 @@
 					<img class="h-16 w-16" src={logoLudo} alt="Logo" />
 				</a>
 				<div class="flex items-center gap-4">
-					<a class="relative" href="/card">
+					<a class="relative" href="/cart">
 						<img class="h-[36px] w-[36px]" src={panier} alt="Panier" />
 						{#if cartCount > 0}
 							<span
