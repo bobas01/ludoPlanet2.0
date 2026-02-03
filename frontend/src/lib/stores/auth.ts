@@ -103,3 +103,29 @@ export const logout = async () => {
 		loadingStore.set(false);
 	}
 };
+
+export const updateMe = async (payload: Partial<User> & { password?: string }) => {
+	try {
+		loadingStore.set(true);
+		errorStore.set(null);
+		const { data } = await api.put<{ user: User }>('/api/me', payload);
+		userStore.set(data.user);
+	} catch (err) {
+		errorStore.set(parseAuthError(err));
+	} finally {
+		loadingStore.set(false);
+	}
+};
+
+export const deleteMe = async () => {
+	try {
+		loadingStore.set(true);
+		errorStore.set(null);
+		await api.delete('/api/me');
+		userStore.set(null);
+	} catch (err) {
+		errorStore.set(parseAuthError(err));
+	} finally {
+		loadingStore.set(false);
+	}
+};

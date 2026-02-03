@@ -14,10 +14,10 @@
 </script>
 
 <svelte:head><link rel="icon" href={favicon} /></svelte:head>
-<div class="min-h-screen bg-linear-to-br from-slate-50 via-white to-amber-50/30">
+<div class="flex min-h-screen flex-col bg-linear-to-br from-slate-50 via-white to-amber-50/30">
 	<Header />
-	<div class="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14">
+	<main class="mx-auto w-full max-w-7xl flex-1 px-4 py-10 sm:px-6 sm:py-14">
 		{@render children()}
-	</div>
+	</main>
 	<Footer />
 </div>

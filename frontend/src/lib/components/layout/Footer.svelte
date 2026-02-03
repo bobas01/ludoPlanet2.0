@@ -7,7 +7,7 @@
 	import iconTwitter from '$lib/assets/icons/iconTwitter.png';
 </script>
 
-<footer class="mt-20 bg-cover bg-center p-10" style={`background-image: url(${bgHeader});`}>
+<footer class="bg-cover bg-center p-10" style={`background-image: url(${bgHeader});`}>
 	<section class="mx-auto flex w-fit flex-col gap-10 text-white md:flex-row md:gap-15 lg:gap-20">
 		<section class="flex flex-col">
 			<p class="mb-4 text-lg font-bold text-[var(--brand-accent)]">Horaires</p>

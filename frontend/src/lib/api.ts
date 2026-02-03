@@ -38,5 +38,17 @@ export const api = {
 			body: JSON.stringify(body)
 		});
 		return { data };
+	},
+	async put<T>(path: string, body: unknown): Promise<{ data: T }> {
+		const data = await request<T>(path, {
+			method: 'PUT',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify(body)
+		});
+		return { data };
+	},
+	async delete<T>(path: string): Promise<{ data: T }> {
+		const data = await request<T>(path, { method: 'DELETE' });
+		return { data };
 	}
 };
