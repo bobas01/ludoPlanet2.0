@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import {
@@ -7,6 +9,9 @@
 		DropdownMenuItem,
 		DropdownMenuTrigger
 	} from '$lib/components/ui/dropdown-menu';
+	import { api } from '$lib/api';
+	import type { Game } from '$lib/types/game';
+	import { logout } from '$lib/stores/auth';
 
 	type MenuItem = { label: string; href: string };
 	type Props = {
@@ -21,10 +26,6 @@
 		onSearch: (event: Event) => void;
 	};
 
-	import { goto } from '$app/navigation';
-	import { page } from '$app/stores';
-	import { logout } from '$lib/stores/auth';
-
 	let {
 		bgHeader,
 		logoLudo,
@@ -33,8 +34,7 @@
 		panier,
 		menuItems,
 		isAuthenticated,
-		cartCount,
-		onSearch
+		cartCount
 	}: Props = $props();
 
 	const redirectTarget = $derived(`${$page.url.pathname}${$page.url.search}`);
@@ -44,6 +44,52 @@
 	const handleLogout = async () => {
 		await logout();
 		await goto('/');
+	};
+
+	let searchTerm = $state('');
+	let searchResults = $state<Game[]>([]);
+	let searchOpen = $state(false);
+	let allGames: Game[] = [];
+	let gamesLoaded = false;
+
+	const loadGames = async () => {
+		if (gamesLoaded) return;
+		const response = await api.get<{ games: Game[] }>('/games');
+		allGames = response.data.games ?? [];
+		gamesLoaded = true;
+	};
+
+	const handleSearchInput = async (event: Event) => {
+		const target = event.currentTarget as HTMLInputElement;
+		searchTerm = target.value;
+
+		if (searchTerm.trim().length < 3) {
+			searchResults = [];
+			searchOpen = false;
+			return;
+		}
+
+		if (!gamesLoaded) {
+			try {
+				await loadGames();
+			} catch {
+				return;
+			}
+		}
+
+		const term = searchTerm.toLowerCase();
+		searchResults = allGames.filter((g) => g.name.toLowerCase().includes(term)).slice(0, 8);
+		searchOpen = searchResults.length > 0;
+	};
+
+	const handleSearchSubmit = (event: Event) => {
+		event.preventDefault();
+	};
+
+	const goToGame = (id: number) => {
+		searchOpen = false;
+		searchTerm = '';
+		goto(`/games/${id}`);
 	};
 </script>
 
@@ -61,10 +107,12 @@
 				</div>
 
 				<div class="flex items-center gap-6">
-					<form class="relative" onsubmit={onSearch}>
+					<form class="relative" onsubmit={handleSearchSubmit}>
 						<Input
 							class="h-12 w-[360px] rounded-[25px] border border-white/20 bg-white/10 pr-12 text-sm text-white backdrop-blur placeholder:text-white/70 focus-visible:ring-white/40"
 							placeholder="Rechercher un jeu"
+							value={searchTerm}
+							oninput={handleSearchInput}
 						/>
 						<Button
 							variant="ghost"
@@ -117,6 +165,36 @@
 					</a>
 				</div>
 			</div>
+			{#if searchOpen}
+				<div class="relative z-40 mt-2 flex justify-end" aria-label="Résultats de la recherche">
+					<div
+						class="w-[360px] rounded-2xl border border-slate-200 bg-white/95 p-2 text-sm text-slate-800 shadow-lg backdrop-blur"
+					>
+						{#if searchResults.length === 0}
+							<p class="px-2 py-1 text-xs text-slate-500">Aucun résultat.</p>
+						{:else}
+							<ul class="max-h-72 space-y-1 overflow-auto">
+								{#each searchResults as game}
+									<li>
+										<button
+											type="button"
+											class="flex w-full items-center justify-between rounded-lg px-2 py-1.5 text-left hover:bg-slate-100"
+											onclick={() => goToGame(game.bggId)}
+										>
+											<span class="truncate">{game.name}</span>
+											{#if game.ratingAverage}
+												<span class="ml-2 shrink-0 text-[11px] text-slate-500">
+													⭐ {game.ratingAverage}
+												</span>
+											{/if}
+										</button>
+									</li>
+								{/each}
+							</ul>
+						{/if}
+					</div>
+				</div>
+			{/if}
 		</div>
 	</div>
 	<div class="w-full bg-[var(--brand-dark)]">
