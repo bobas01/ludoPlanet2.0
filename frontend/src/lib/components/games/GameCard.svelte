@@ -129,7 +129,7 @@
 
 		<div class="mt-4 flex items-center justify-between gap-3 border-t border-slate-100 pt-4">
 			{#if game.priceCents != null}
-				<span class="text-lg font-bold text-[var(--brand-accent)]">
+				<span class="text-lg font-bold whitespace-nowrap text-[var(--brand-accent)]">
 					{formatPrice(game.priceCents)}
 				</span>
 			{:else}

@@ -143,9 +143,11 @@
 		<p class="mb-4 text-sm text-slate-500">
 			{filteredAndSortedGames.length} jeu(x) — page {currentPage} / {totalPages}
 		</p>
-		<ul class="grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-8 lg:grid-cols-3 xl:grid-cols-4">
+		<ul
+			class="grid grid-cols-1 items-stretch gap-6 sm:grid-cols-2 sm:gap-8 lg:grid-cols-3 xl:grid-cols-4"
+		>
 			{#each paginatedGames as game (game.bggId)}
-				<li>
+				<li class="h-full">
 					<GameCard {game} />
 				</li>
 			{/each}
