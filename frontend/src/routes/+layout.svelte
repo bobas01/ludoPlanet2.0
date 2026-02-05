@@ -2,9 +2,10 @@
 	import { onMount } from 'svelte';
 	import favicon from '$lib/assets/favicon.png';
 	import Header from '$lib/components/layout/Header.svelte';
-	import './layout.css';
 	import Footer from '$lib/components/layout/Footer.svelte';
+	import CookieConsent from '$lib/components/layout/CookieConsent.svelte';
 	import { loadMe } from '$lib/stores/auth';
+	import './layout.css';
 
 	let { children } = $props();
 
@@ -20,4 +21,5 @@
 		{@render children()}
 	</main>
 	<Footer />
+	<CookieConsent />
 </div>
