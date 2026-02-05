@@ -13,7 +13,18 @@ use Symfony\Component\HttpKernel\KernelEvents;
 
 final class CorsEventSubscriber implements EventSubscriberInterface
 {
-    private const ALLOWED_ORIGINS = ['http://localhost:5173', 'http://127.0.0.1:5173', 'http://localhost:4173', 'http://127.0.0.1:4173'];
+    private const DEFAULT_ORIGINS = ['http://localhost:5173', 'http://127.0.0.1:5173', 'http://localhost:4173', 'http://127.0.0.1:4173'];
+
+    /** @var list<string> */
+    private readonly array $allowedOrigins;
+
+    public function __construct(string $corsAllowedOrigins = '')
+    {
+        $extra = $corsAllowedOrigins !== ''
+            ? array_filter(array_map('trim', explode(',', $corsAllowedOrigins)))
+            : [];
+        $this->allowedOrigins = array_values(array_unique(array_merge(self::DEFAULT_ORIGINS, $extra)));
+    }
 
     public static function getSubscribedEvents(): array
     {
@@ -30,7 +41,7 @@ final class CorsEventSubscriber implements EventSubscriberInterface
         }
 
         $origin = $event->getRequest()->headers->get('Origin', '');
-        if (!in_array($origin, self::ALLOWED_ORIGINS, true)) {
+        if (!in_array($origin, $this->allowedOrigins, true)) {
             return;
         }
 
@@ -52,7 +63,7 @@ final class CorsEventSubscriber implements EventSubscriberInterface
         $request = $event->getRequest();
         $origin = $request->headers->get('Origin', '');
 
-        if (!in_array($origin, self::ALLOWED_ORIGINS, true)) {
+        if (!in_array($origin, $this->allowedOrigins, true)) {
             return;
         }
 

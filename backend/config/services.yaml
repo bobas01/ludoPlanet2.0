@@ -12,6 +12,12 @@ parameters:
     stripe_secret_key: "%env(STRIPE_SECRET_KEY)%"
     stripe_webhook_secret: "%env(STRIPE_WEBHOOK_SECRET)%"
     frontend_url: "%env(FRONTEND_URL)%"
+    # Origines CORS supplémentaires (prod) : définir CORS_ALLOWED_ORIGINS dans .env
+    cors_allowed_origins: ''
+
+when@prod:
+    parameters:
+        cors_allowed_origins: "%env(CORS_ALLOWED_ORIGINS)%"
 
 services:
     # default configuration for services in *this* file
@@ -29,6 +35,14 @@ services:
             $stripeSecretKey: "%stripe_secret_key%"
             $stripeWebhookSecret: "%stripe_webhook_secret%"
             $frontendUrl: "%frontend_url%"
+
+    App\EventSubscriber\CorsEventSubscriber:
+        arguments:
+            $corsAllowedOrigins: "%cors_allowed_origins%"
+
+    App\EventSubscriber\RateLimitLoginSubscriber:
+        arguments:
+            $cache: '@cache.app'
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
