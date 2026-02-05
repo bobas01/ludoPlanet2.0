@@ -1,10 +1,13 @@
 <script lang="ts">
-	import { BASE_URL } from '$lib/api';
+	import { onMount } from 'svelte';
+	import { goto } from '$app/navigation';
+	import { replaceState } from '$app/navigation';
+	import { page } from '$app/stores';
+	import { BASE_URL, api } from '$lib/api';
 	import iconCharriot from '$lib/assets/icons/iconCharriot.png';
 	import iconTrash from '$lib/assets/icons/iconTrash.png';
 	import { Button } from '$lib/components/ui/button';
 	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
-	import { Input } from '$lib/components/ui/input';
 	import {
 		cartItems,
 		cartTotalCents,
@@ -12,6 +15,7 @@
 		updateQuantity,
 		clearCart
 	} from '$lib/stores/cart';
+	import { authUser } from '$lib/stores/auth';
 	import { formatPrice } from '$lib/utils/games';
 
 	const resolveImageUrl = (url: string | null) => {
@@ -25,10 +29,95 @@
 		if (Number.isNaN(next)) return;
 		updateQuantity(bggId, next);
 	};
+
+	const PAYMENT_CANCELLED_KEY = 'cart_payment_cancelled';
+
+	let checkoutLoading = false;
+	let checkoutError = '';
+	// Dès le chargement : afficher le message si on revient de Stripe (URL ou sessionStorage après replaceState)
+	let showPaymentFailedMessage =
+		typeof window !== 'undefined' &&
+		(window.location.search.includes('payment=cancelled') ||
+			sessionStorage.getItem(PAYMENT_CANCELLED_KEY) === '1');
+
+	$: if (typeof window !== 'undefined' && $page.url.searchParams.get('payment') === 'cancelled') {
+		showPaymentFailedMessage = true;
+		try {
+			sessionStorage.setItem(PAYMENT_CANCELLED_KEY, '1');
+		} catch {}
+	}
+
+	onMount(() => {
+		if ($page.url.searchParams.get('payment') === 'cancelled') {
+			showPaymentFailedMessage = true;
+			sessionStorage.setItem(PAYMENT_CANCELLED_KEY, '1');
+			replaceState('/cart', {});
+		}
+	});
+
+	// Ne plus afficher le message à la prochaine tentative de paiement
+	function dismissPaymentFailedMessage() {
+		showPaymentFailedMessage = false;
+		if (typeof sessionStorage !== 'undefined') sessionStorage.removeItem(PAYMENT_CANCELLED_KEY);
+	}
+
+	async function handleCheckout() {
+		if ($cartItems.length === 0) return;
+		if (!$authUser) {
+			goto('/login');
+			return;
+		}
+		checkoutError = '';
+		dismissPaymentFailedMessage();
+		checkoutLoading = true;
+		try {
+			const payload = {
+				items: $cartItems.map((item) => ({
+					game_id: item.game.bggId,
+					quantity: item.quantity
+				}))
+			};
+			const { data } = await api.post<{ url: string }>('/api/checkout/session', payload);
+			if (data?.url) {
+				window.location.href = data.url;
+				return;
+			}
+			checkoutError = 'Réponse serveur invalide.';
+		} catch (err: unknown) {
+			const msg =
+				err &&
+				typeof err === 'object' &&
+				'data' in err &&
+				typeof (err as { data?: unknown }).data === 'object' &&
+				(err as { data?: { error?: string } }).data?.error
+					? (err as { data: { error: string } }).data.error
+					: 'Impossible de créer la session de paiement.';
+			checkoutError = msg;
+		} finally {
+			checkoutLoading = false;
+		}
+	}
 </script>
 
 <div class="mx-auto max-w-4xl">
 	<h1 class="text-2xl font-bold text-slate-800">Mon panier</h1>
+
+	{#if showPaymentFailedMessage}
+		<div
+			class="mt-4 flex items-center justify-between gap-4 rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800"
+			role="alert"
+		>
+			<span>Paiement échoué ou annulé. Réessayez de payer.</span>
+			<button
+				type="button"
+				class="shrink-0 text-amber-700 underline hover:no-underline"
+				onclick={dismissPaymentFailedMessage}
+				aria-label="Fermer le message"
+			>
+				Fermer
+			</button>
+		</div>
+	{/if}
 
 	{#if $cartItems.length === 0}
 		<Card class="mt-6">
@@ -106,17 +195,30 @@
 			<CardHeader>
 				<CardTitle>Récapitulatif</CardTitle>
 			</CardHeader>
-			<CardContent class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-				<div class="text-sm text-slate-600">
-					Total: <span class="font-semibold text-slate-800">{formatPrice($cartTotalCents)}</span>
+			<CardContent class="flex flex-col gap-4">
+				<div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+					<div class="text-sm text-slate-600">
+						Total: <span class="font-semibold text-slate-800">{formatPrice($cartTotalCents)}</span>
+					</div>
+					<div class="flex flex-wrap gap-3">
+						<Button variant="outline" onclick={clearCart}>Vider le panier</Button>
+						<Button
+							class="bg-[var(--brand-accent)] text-white hover:bg-[var(--brand-accent)]/90"
+							onclick={handleCheckout}
+							disabled={checkoutLoading}
+						>
+							{#if checkoutLoading}
+								Paiement en cours…
+							{:else}
+								<img src={iconCharriot} alt="" class="h-4 w-4" aria-hidden="true" />
+								Payer avec Stripe
+							{/if}
+						</Button>
+					</div>
 				</div>
-				<div class="flex flex-wrap gap-3">
-					<Button variant="outline" onclick={clearCart}>Vider le panier</Button>
-					<Button class="bg-[var(--brand-accent)] text-white hover:bg-[var(--brand-accent)]/90">
-						<img src={iconCharriot} alt="" class="h-4 w-4" aria-hidden="true" />
-						Acheter (Stripe plus tard)
-					</Button>
-				</div>
+				{#if checkoutError}
+					<p class="text-sm text-red-600" role="alert">{checkoutError}</p>
+				{/if}
 			</CardContent>
 		</Card>
 	{/if}

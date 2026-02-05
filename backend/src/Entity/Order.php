@@ -52,6 +52,9 @@ class Order
     #[ORM\Column(type: 'string', length: 30, nullable: true)]
     private ?string $phone = null;
 
+    #[ORM\Column(name: 'stripe_session_id', type: 'string', length: 255, nullable: true)]
+    private ?string $stripeSessionId = null;
+
     #[ORM\Column(name: 'created_at', type: 'datetime_immutable')]
     private \DateTimeImmutable $createdAt;
 
@@ -192,6 +195,17 @@ class Order
     public function setPhone(?string $phone): self
     {
         $this->phone = $phone;
+        return $this;
+    }
+
+    public function getStripeSessionId(): ?string
+    {
+        return $this->stripeSessionId;
+    }
+
+    public function setStripeSessionId(?string $stripeSessionId): self
+    {
+        $this->stripeSessionId = $stripeSessionId;
         return $this;
     }
 

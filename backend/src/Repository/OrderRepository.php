@@ -14,4 +14,9 @@ class OrderRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, Order::class);
     }
+
+    public function findOneByStripeSessionId(string $stripeSessionId): ?Order
+    {
+        return $this->findOneBy(['stripeSessionId' => $stripeSessionId]);
+    }
 }

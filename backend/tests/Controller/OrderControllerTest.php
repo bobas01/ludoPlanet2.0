@@ -83,6 +83,28 @@ final class OrderControllerTest extends WebTestCase
         self::assertSame('/uploads/catan.png', $item['game_image_url']);
     }
 
+    public function testMyOrdersRequiresAuth(): void
+    {
+        $this->client->request('GET', '/api/my-orders');
+
+        self::assertResponseStatusCodeSame(401);
+    }
+
+    public function testAdminIndexRequiresAdminRole(): void
+    {
+        $customer = $this->createUser('customer3@example.com', 'Password!1234');
+        $this->entityManager->persist($customer);
+        $this->entityManager->flush();
+
+        $token = $this->loginAndGetToken('customer3@example.com', 'Password!1234');
+
+        $this->client->request('GET', '/api/orders', server: [
+            'HTTP_AUTHORIZATION' => 'Bearer ' . $token,
+        ]);
+
+        self::assertResponseStatusCodeSame(403);
+    }
+
     public function testMyOrdersFilterAndPagination(): void
     {
         $admin = $this->createUser('admin2@example.com', 'Password!1234', ['ROLE_ADMIN']);
