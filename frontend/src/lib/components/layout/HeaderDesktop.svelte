@@ -22,6 +22,7 @@
 		panier: string;
 		menuItems: MenuItem[];
 		isAuthenticated: boolean;
+		isAdmin: boolean;
 		cartCount: number;
 		onSearch: (event: Event) => void;
 	};
@@ -34,6 +35,7 @@
 		panier,
 		menuItems,
 		isAuthenticated,
+		isAdmin,
 		cartCount
 	}: Props = $props();
 
@@ -136,6 +138,11 @@
 							align="end"
 						>
 							{#if isAuthenticated}
+								{#if isAdmin}
+									<DropdownMenuItem class="cursor-pointer" onSelect={() => goto('/dashboard')}>
+										Dashboard
+									</DropdownMenuItem>
+								{/if}
 								<DropdownMenuItem class="cursor-pointer" onSelect={goToProfile}>
 									Mes infos
 								</DropdownMenuItem>

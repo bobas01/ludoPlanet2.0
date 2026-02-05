@@ -23,6 +23,7 @@
 		burger: string;
 		menuItems: MenuItem[];
 		isAuthenticated: boolean;
+		isAdmin: boolean;
 		cartCount: number;
 		onSearch: (event: Event) => void;
 	};
@@ -35,6 +36,7 @@
 		burger,
 		menuItems,
 		isAuthenticated,
+		isAdmin,
 		cartCount
 	}: Props = $props();
 
@@ -136,6 +138,12 @@
 								</DropdownMenuItem>
 							{/if}
 							<DropdownMenuSeparator />
+							{#if isAdmin}
+								<DropdownMenuItem class="cursor-pointer" onSelect={() => goto('/dashboard')}>
+									Dashboard
+								</DropdownMenuItem>
+								<DropdownMenuSeparator />
+							{/if}
 							{#each menuItems as item}
 								<DropdownMenuItem class="cursor-pointer">{item.label}</DropdownMenuItem>
 							{/each}

@@ -30,6 +30,7 @@
 	import { cartCount } from '$lib/stores/cart';
 
 	let isAuthenticated = $derived(!!$authUser);
+	let isAdmin = $derived(!!$authUser && $authUser.roles?.includes('ROLE_ADMIN'));
 	let carouselIndex = $state(0);
 	const carouselImages = [carouselPublicitaire1, carouselPublicitaire3, carouselPublicitaire2];
 	const showCarousel = $derived($page.url.pathname === '/');
@@ -54,6 +55,7 @@
 	{panier}
 	{menuItems}
 	{isAuthenticated}
+	{isAdmin}
 	cartCount={$cartCount}
 	onSearch={handleSearch}
 />
@@ -70,6 +72,7 @@
 	{burger}
 	menuItems={mobileMenuItems}
 	{isAuthenticated}
+	{isAdmin}
 	cartCount={$cartCount}
 	onSearch={handleSearch}
 />
