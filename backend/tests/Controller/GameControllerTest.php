@@ -6,18 +6,12 @@ namespace App\Tests\Controller;
 
 use App\Entity\Game;
 use App\Entity\GameImage;
-use Doctrine\ORM\EntityManagerInterface;
 
-final class GameControllerTest extends DatabaseWebTestCase
+final class GameControllerTest extends AdminWebTestCase
 {
-    private EntityManagerInterface $entityManager;
-    private \Symfony\Bundle\FrameworkBundle\KernelBrowser $client;
-
     protected function setUp(): void
     {
-        $this->client = static::createClient();
-        $this->entityManager = static::getContainer()->get(EntityManagerInterface::class);
-        $this->setUpDatabase($this->entityManager);
+        parent::setUp();
     }
 
     public function testIndex(): void

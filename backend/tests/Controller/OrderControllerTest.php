@@ -9,29 +9,12 @@ use App\Entity\GameImage;
 use App\Entity\Order;
 use App\Entity\OrderItem;
 use App\Entity\User;
-use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\Tools\SchemaTool;
-use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
-final class OrderControllerTest extends WebTestCase
+final class OrderControllerTest extends AdminWebTestCase
 {
-    private EntityManagerInterface $entityManager;
-    private UserPasswordHasherInterface $passwordHasher;
-    private \Symfony\Bundle\FrameworkBundle\KernelBrowser $client;
-
     protected function setUp(): void
     {
-        $this->client = static::createClient();
-        $this->entityManager = static::getContainer()->get(EntityManagerInterface::class);
-        $this->passwordHasher = static::getContainer()->get(UserPasswordHasherInterface::class);
-
-        $metadata = $this->entityManager->getMetadataFactory()->getAllMetadata();
-        if ($metadata !== []) {
-            $schemaTool = new SchemaTool($this->entityManager);
-            $schemaTool->dropSchema($metadata);
-            $schemaTool->createSchema($metadata);
-        }
+        parent::setUp();
     }
 
     public function testAdminCanCreateOrderWithGameDetails(): void
@@ -135,22 +118,6 @@ final class OrderControllerTest extends WebTestCase
         self::assertNotSame($olderPaid->getId(), $data['orders'][0]['id']);
     }
 
-    private function createUser(string $email, string $plainPassword, array $roles = ['ROLE_USER']): User
-    {
-        $user = new User($email, '');
-        $user->setFirstName('Jean');
-        $user->setLastName('Dupont');
-        $user->setAddress('12 rue des Lilas');
-        $user->setPhoneNumber('0612345678');
-        $user->setBirthDate(new \DateTimeImmutable('2000-05-12'));
-
-        $passwordHash = $this->passwordHasher->hashPassword($user, $plainPassword);
-        $user->setPasswordHash($passwordHash);
-        $user->setRoles($roles);
-
-        return $user;
-    }
-
     private function createGameWithImage(int $bggId, string $name, string $imageUrl): Game
     {
         $game = new Game($bggId, $name);
@@ -176,17 +143,5 @@ final class OrderControllerTest extends WebTestCase
         $this->entityManager->persist($item);
 
         return $order;
-    }
-
-    private function loginAndGetToken(string $email, string $password): string
-    {
-        $this->client->request('POST', '/api/login', server: ['CONTENT_TYPE' => 'application/json'], content: json_encode([
-            'email' => $email,
-            'password' => $password,
-        ]));
-
-        self::assertResponseIsSuccessful();
-        $data = json_decode((string) $this->client->getResponse()->getContent(), true);
-        return $data['token'] ?? '';
     }
 }
