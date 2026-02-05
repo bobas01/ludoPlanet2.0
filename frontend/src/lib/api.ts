@@ -50,5 +50,12 @@ export const api = {
 	async delete<T>(path: string): Promise<{ data: T }> {
 		const data = await request<T>(path, { method: 'DELETE' });
 		return { data };
+	},
+	async postForm<T>(path: string, body: FormData): Promise<{ data: T }> {
+		const data = await request<T>(path, {
+			method: 'POST',
+			body
+		});
+		return { data };
 	}
 };
