@@ -8,7 +8,9 @@ export default defineConfig({
 	ssr: {
 		noExternal: ['bits-ui']
 	},
-
+	preview: {
+        allowedHosts: ['ludoplanet-compose-0zfcqz-c9c605-72-60-189-212.traefik.me']
+    },
 	test: {
 		expect: { requireAssertions: true },
 
