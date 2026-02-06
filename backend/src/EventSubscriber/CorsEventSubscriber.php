@@ -13,7 +13,7 @@ use Symfony\Component\HttpKernel\KernelEvents;
 
 final class CorsEventSubscriber implements EventSubscriberInterface
 {
-    private const DEFAULT_ORIGINS = ['http://localhost:5173', 'http://127.0.0.1:5173', 'http://localhost:4173', 'http://127.0.0.1:4173', 'http://72.60.189.212:3500/'];
+    private const DEFAULT_ORIGINS = ['http://localhost:5173', 'http://127.0.0.1:5173', 'http://localhost:4173', 'http://127.0.0.1:4173'];
 
     /** @var list<string> */
     private readonly array $allowedOrigins;
@@ -23,7 +23,13 @@ final class CorsEventSubscriber implements EventSubscriberInterface
         $extra = $corsAllowedOrigins !== ''
             ? array_filter(array_map('trim', explode(',', $corsAllowedOrigins)))
             : [];
-        $this->allowedOrigins = array_values(array_unique(array_merge(self::DEFAULT_ORIGINS, $extra)));
+        $all = array_merge(self::DEFAULT_ORIGINS, $extra);
+        $this->allowedOrigins = array_values(array_unique(array_map([self::class, 'normalizeOrigin'], $all)));
+    }
+
+    private static function normalizeOrigin(string $origin): string
+    {
+        return rtrim($origin, '/');
     }
 
     public static function getSubscribedEvents(): array
@@ -40,8 +46,8 @@ final class CorsEventSubscriber implements EventSubscriberInterface
             return;
         }
 
-        $origin = $event->getRequest()->headers->get('Origin', '');
-        if (!in_array($origin, $this->allowedOrigins, true)) {
+        $origin = self::normalizeOrigin($event->getRequest()->headers->get('Origin', ''));
+        if ($origin === '' || !in_array($origin, $this->allowedOrigins, true)) {
             return;
         }
 
@@ -61,9 +67,9 @@ final class CorsEventSubscriber implements EventSubscriberInterface
         }
 
         $request = $event->getRequest();
-        $origin = $request->headers->get('Origin', '');
+        $origin = self::normalizeOrigin($request->headers->get('Origin', ''));
 
-        if (!in_array($origin, $this->allowedOrigins, true)) {
+        if ($origin === '' || !in_array($origin, $this->allowedOrigins, true)) {
             return;
         }
 
