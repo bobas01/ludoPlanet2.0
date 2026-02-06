@@ -5,10 +5,6 @@ services:
       - "3307:3306"
     volumes:
       - ./database:/var/lib/mysql
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: ludoplanet
-    command: --wait_timeout=28800 --interactive_timeout=28800 --max_allowed_packet=64M
     networks:
       - app-network
   frontend:
@@ -27,8 +23,6 @@ services:
       - "8000:8000"
     volumes:
       - ./backend:/app
-    env_file:
-      - ./backend/.env
     depends_on:
       - database
     networks:
@@ -37,10 +31,6 @@ services:
     image: phpmyadmin/phpmyadmin
     ports:
       - "8080:80"
-    environment:
-      PMA_HOST: database
-      PMA_PORT: 3306
-      MYSQL_ROOT_PASSWORD: root
     depends_on:
       - database
     networks:
