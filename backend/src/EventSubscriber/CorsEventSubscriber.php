@@ -18,7 +18,7 @@ final class CorsEventSubscriber implements EventSubscriberInterface
         'http://127.0.0.1:5173',
         'http://localhost:4173',
         'http://127.0.0.1:4173',
-        'http://72.60.189.212:3500/',
+        'http://72.60.189.212:3500',
     ];
 
     /** @var list<string> */
