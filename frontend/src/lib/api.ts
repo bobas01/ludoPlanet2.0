@@ -1,7 +1,4 @@
-export const BASE_URL =
-	import.meta.env.MODE === 'dev'
-		? 'http://localhost:8000'
-		: 'http://localhost:8000';
+export const BASE_URL ='http://localhost:8000'
 
 type ApiError = Error & { status?: number; data?: unknown };
 
