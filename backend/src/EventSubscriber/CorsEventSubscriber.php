@@ -13,7 +13,13 @@ use Symfony\Component\HttpKernel\KernelEvents;
 
 final class CorsEventSubscriber implements EventSubscriberInterface
 {
-    private const DEFAULT_ORIGINS = ['http://localhost:5173', 'http://127.0.0.1:5173', 'http://localhost:4173', 'http://127.0.0.1:4173'];
+    private const DEFAULT_ORIGINS = [
+        'http://localhost:5173',
+        'http://127.0.0.1:5173',
+        'http://localhost:4173',
+        'http://127.0.0.1:4173',
+        'http://72.60.189.212:3500/',
+    ];
 
     /** @var list<string> */
     private readonly array $allowedOrigins;
@@ -35,7 +41,7 @@ final class CorsEventSubscriber implements EventSubscriberInterface
     public static function getSubscribedEvents(): array
     {
         return [
-            KernelEvents::REQUEST => ['onKernelRequest', 100],
+            KernelEvents::REQUEST  => ['onKernelRequest', 100],
             KernelEvents::RESPONSE => ['onKernelResponse', 100],
         ];
     }
@@ -73,10 +79,11 @@ final class CorsEventSubscriber implements EventSubscriberInterface
             return;
         }
 
-        $event->getResponse()->headers->set('Access-Control-Allow-Origin', $origin);
-        $event->getResponse()->headers->set('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
-        $event->getResponse()->headers->set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-        $event->getResponse()->headers->set('Access-Control-Allow-Credentials', 'true');
-        $event->getResponse()->headers->set('Access-Control-Max-Age', '86400');
+        $response = $event->getResponse();
+        $response->headers->set('Access-Control-Allow-Origin', $origin);
+        $response->headers->set('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
+        $response->headers->set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+        $response->headers->set('Access-Control-Allow-Credentials', 'true');
+        $response->headers->set('Access-Control-Max-Age', '86400');
     }
 }
