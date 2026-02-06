@@ -19,14 +19,14 @@ Application web de catalogue et vente de jeux de société : frontend SvelteKit,
 
 ## Stack technique
 
-| Couche      | Techno                    |
-|------------|---------------------------|
-| **Frontend** | SvelteKit 2, Svelte 5, Tailwind CSS, composants type shadcn (bits-ui) |
-| **Backend**  | Symfony 8, PHP 8.4, API REST JSON |
-| **Base de données** | MySQL 8 (Doctrine ORM) |
-| **Auth**     | JWT (Lexik), cookie httpOnly |
-| **Paiement** | Stripe (Checkout Session) |
-| **Outils**   | Docker Compose, PHPUnit, Vitest |
+| Couche              | Techno                                                                |
+| ------------------- | --------------------------------------------------------------------- |
+| **Frontend**        | SvelteKit 2, Svelte 5, Tailwind CSS, composants type shadcn (bits-ui) |
+| **Backend**         | Symfony 8, PHP 8.4, API REST JSON                                     |
+| **Base de données** | MySQL 8 (Doctrine ORM)                                                |
+| **Auth**            | JWT (Lexik), cookie httpOnly                                          |
+| **Paiement**        | Stripe (Checkout Session)                                             |
+| **Outils**          | Docker Compose, PHPUnit, Vitest                                       |
 
 Fonctionnalités principales : catalogue jeux (filtres, détail), panier, checkout Stripe, compte utilisateur (profil, commandes), dashboard admin (jeux, domaines, mécaniques, images catégories, commandes), bannière cookies, rate limiting login/register.
 
@@ -53,11 +53,11 @@ docker compose up -d
 
 ### Accès aux services
 
-| Service     | URL                    |
-|------------|------------------------|
-| **Frontend** | http://localhost:4173 |
-| **Backend**  | http://localhost:8000 |
-| **phpMyAdmin** | http://localhost:8080 |
+| Service                  | URL                   |
+| ------------------------ | --------------------- |
+| **Frontend**             | http://localhost:4173 |
+| **Backend**              | http://localhost:8000 |
+| **phpMyAdmin**           | http://localhost:8080 |
 | **Mailpit** (emails dev) | http://localhost:8025 |
 
 **Base de données** : `localhost:3307` — user `root`, password `root`, base `ludoplanet`.
@@ -147,16 +147,16 @@ Frontend : http://localhost:5173. L’API est appelée vers `http://localhost:80
 
 ### Backend (`.env` / `.env.local`)
 
-| Variable | Description |
-|----------|-------------|
-| `DATABASE_URL` | Connexion MySQL |
-| `APP_SECRET` | Secret Symfony |
-| `JWT_SECRET_KEY` / `JWT_PUBLIC_KEY` / `JWT_PASSPHRASE` | Clés JWT (Lexik) |
-| `JWT_TTL` | Durée de vie du token (secondes) |
-| `STRIPE_SECRET_KEY` / `STRIPE_WEBHOOK_SECRET` | Stripe |
-| `FRONTEND_URL` | URL du front (redirects Stripe, CORS en prod) |
-| `CORS_ALLOWED_ORIGINS` | Origines CORS en prod (ex. `https://mondomaine.com`) |
-| `MAILER_DSN` | Envoi d’emails (ex. `smtp://...` ou `null://null` en dev) |
+| Variable                                               | Description                                               |
+| ------------------------------------------------------ | --------------------------------------------------------- |
+| `DATABASE_URL`                                         | Connexion MySQL                                           |
+| `APP_SECRET`                                           | Secret Symfony                                            |
+| `JWT_SECRET_KEY` / `JWT_PUBLIC_KEY` / `JWT_PASSPHRASE` | Clés JWT (Lexik)                                          |
+| `JWT_TTL`                                              | Durée de vie du token (secondes)                          |
+| `STRIPE_SECRET_KEY` / `STRIPE_WEBHOOK_SECRET`          | Stripe                                                    |
+| `FRONTEND_URL`                                         | URL du front (redirects Stripe, CORS en prod)             |
+| `CORS_ALLOWED_ORIGINS`                                 | Origines CORS en prod (ex. `https://mondomaine.com`)      |
+| `MAILER_DSN`                                           | Envoi d’emails (ex. `smtp://...` ou `null://null` en dev) |
 
 ### Frontend
 
