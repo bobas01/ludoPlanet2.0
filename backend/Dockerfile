@@ -6,11 +6,13 @@ RUN apk add --no-cache curl ca-certificates mariadb-dev && \
 
 WORKDIR /app
 
-COPY composer.json ./
-
-RUN composer install
+# Install des deps avec lock pour build reproductible (sans dev en prod)
+COPY composer.json composer.lock ./
+RUN composer install --no-dev --no-scripts --no-autoloader --ignore-platform-reqs
 
 COPY . .
+
+RUN composer dump-autoload --optimize --no-dev
 
 EXPOSE 8000
 
