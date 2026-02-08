@@ -8,6 +8,9 @@ nelmio_cors:
             - 'http://localhost:4173'
             - 'http://127.0.0.1:4173'
             - 'http://72.60.189.212:3500'
+            - 'https://72.60.189.212:3500'
+            - 'http://72.60.189.212:3501'
+            - 'https://72.60.189.212:3501'
         allow_methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS']
         allow_headers: ['Content-Type', 'Authorization']
         allow_credentials: true
@@ -20,6 +23,9 @@ nelmio_cors:
                 - 'http://localhost:4173'
                 - 'http://127.0.0.1:4173'
                 - 'http://72.60.189.212:3500'
+                - 'https://72.60.189.212:3500'
+                - 'http://72.60.189.212:3501'
+                - 'https://72.60.189.212:3501'
             allow_headers: ['Content-Type', 'Authorization']
             allow_methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS']
             allow_credentials: true
