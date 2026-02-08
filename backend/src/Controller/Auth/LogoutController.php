@@ -14,7 +14,8 @@ final class LogoutController
     #[Route('/api/logout', name: 'api_logout', methods: ['POST'])]
     public function __invoke(): Response
     {
-        $response = new JsonResponse(['ok' => true]);
+        try {
+            $response = new JsonResponse(['ok' => true]);
         $response->headers->setCookie(new Cookie(
             'AUTH_TOKEN',
             '',
@@ -26,6 +27,11 @@ final class LogoutController
             false,
             Cookie::SAMESITE_LAX
         ));
+        } catch (\Exception $e) {
+            return new JsonResponse([
+                'error' => 'An error occurred while logging out.',
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
 
         return $response;
     }

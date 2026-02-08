@@ -1,6 +1,6 @@
 services:
-  database:
-    image: mysql:8.0
+  db:
+    image: mariadb:10.11
     ports:
       - "3307:3306"
     volumes:
@@ -8,8 +8,8 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: ludoplanet
-      MYSQL_USER: ludoplanet
-      MYSQL_PASSWORD: ludoplanet
+      MYSQL_USER: root
+      MYSQL_PASSWORD: root
     command: --wait_timeout=28800 --interactive_timeout=28800 --max_allowed_packet=64M
     networks:
       - app-network
@@ -30,7 +30,7 @@ services:
     volumes:
       - ./backend:/app
     depends_on:
-      - database
+      - db
     networks:
       - app-network
   phpmyadmin:
@@ -38,7 +38,7 @@ services:
     ports:
       - "8081:80"
     depends_on:
-      - database
+      - db
     networks:
       - app-network
   mailpit:

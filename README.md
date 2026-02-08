@@ -116,17 +116,20 @@ openssl pkey -in config/jwt/private.pem -out config/jwt/public.pem -pubout
 
 Indiquer le passphrase dans `.env` : `JWT_PASSPHRASE=...`
 
-**Base de données** : renseigner `DATABASE_URL` dans `.env` (ex. `mysql://root:root@127.0.0.1:3307/ludoplanet`). Puis :
+**Base de données** : renseigner `DATABASE_URL` dans `.env` ou `.env.local`.  
+- **Backend lancé en local** (`symfony serve` ou `php -S`) : utiliser `127.0.0.1` et le port **3307** (MySQL exposé par Docker), ex. `mysql://root:root@127.0.0.1:3307/ludoplanet`.  
+- **Backend dans Docker** : le host est `db` (nom du service dans le réseau Docker).  
+Si tu as l’erreur « getaddrinfo for db failed » ou « Hôte inconnu », c’est que ton `.env` pointe vers `db` alors que tu lances le backend en local — remplace par `127.0.0.1:3307`. Puis :
 
 ```bash
 php bin/console doctrine:migrations:migrate
 php bin/console doctrine:fixtures:load  # optionnel
 ```
 
-**Lancer le serveur** :
+**Lancer le serveur** (obligatoire : utiliser le routeur pour que `/games`, `/api/*`, etc. passent par Symfony et aient les en-têtes CORS) :
 
 ```bash
-php -S localhost:8000 -t public
+php -S localhost:8000 -t public public/router.php
 ```
 
 ### Frontend (SvelteKit)
