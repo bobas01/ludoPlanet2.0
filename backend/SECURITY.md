@@ -3,28 +3,35 @@
 ## Backend (Symfony)
 
 ### Injections SQL
+
 - **OK** : Doctrine / DQL avec `$repository->find()`, `findBy()`, paramètres liés. Pas de requêtes SQL brutes concaténées.
 
 ### Authentification
+
 - **OK** : JWT (Lexik) avec cookie `AUTH_TOKEN` (httpOnly, SameSite=Lax). Le front envoie le cookie via `credentials: 'include'`.
 - **OK** : Rate limiting sur `/api/login` et `/api/register` (10 requêtes / minute / IP) via `RateLimitLoginSubscriber`.
 
 ### Contrôle d’accès
+
 - **OK** : `access_control` dans `security.yaml` : `/api/admin` et `/api/orders` réservés à `ROLE_ADMIN`.
 - **OK** : Commandes utilisateur : `myOrders` filtre par `['user' => $user]` ; `myOrderShow` vérifie `$order->getUser()?->getId() === $user->getId()`. Attribut `#[IsGranted('ROLE_ADMIN')]` sur les actions admin des commandes.
 
 ### XSS
+
 - Backend : pas de rendu HTML direct ; API JSON. Twig échappe par défaut si utilisé.
 - Frontend Svelte : éviter `{@html}` avec des données non contrôlées. Aucun `{@html}` utilisé actuellement.
 
 ### Mots de passe
+
 - **OK** : `security.yaml` → `password_hashers: ... "auto"` (Argon2 / bcrypt selon l’environnement).
 
 ### CORS
-- **OK** : `CorsEventSubscriber` n’autorise que des origines définies (localhost en dev + variable d’environnement en prod).
-- **Prod** : définir `CORS_ALLOWED_ORIGINS` dans `.env` (ex. `https://mondomaine.com` ou plusieurs URLs séparées par des virgules).
+
+- **OK** : Nelmio CORS (`nelmio/cors-bundle`) n’autorise que les origines définies (liste par défaut en dev ; en prod via `CORS_ALLOWED_ORIGINS`).
+- **Prod** : définir `CORS_ALLOWED_ORIGINS` dans `.env` (liste complète des origines autorisées, séparées par des virgules, ex. `https://mondomaine.com` ou les mêmes que en dev).
 
 ### Logs
+
 - **OK** : Monolog activé. Les échecs de connexion sont loggés (IP, email si présent, message) via `LoginFailureLogSubscriber` (niveau `warning`).
 
 ---
@@ -32,13 +39,16 @@
 ## Frontend (SvelteKit)
 
 ### Exposition du token
+
 - **OK** : Le JWT est stocké dans un **cookie httpOnly** (`AUTH_TOKEN`) posé par le backend au login. Le front n’a pas accès au token en JS ; il envoie le cookie avec `credentials: 'include'`. Pas de localStorage pour l’auth.
 
 ### CSRF
+
 - Stripe gère la sécurité de son flux (paiement).
 - API stateless (JWT) : pas de cookie de session Symfony côté front ; le cookie JWT est envoyé par le navigateur. Pour des formulaires personnalisés qui modifient des données sensibles, un token CSRF Symfony peut être ajouté si besoin (non en place pour l’instant sur l’API JSON).
 
 ### HTTPS
+
 - **Prod** : forcer HTTPS (config hébergeur, ex. Hostinger).
 
 ---
