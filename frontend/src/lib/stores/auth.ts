@@ -21,6 +21,16 @@ const userStore = writable<User | null>(null);
 const loadingStore = writable(false);
 const errorStore = writable<AuthError | null>(null);
 
+const SESSION_FLAG = 'ludoplanet_has_session';
+
+const hasSessionFlag = (): boolean => typeof document !== 'undefined' && sessionStorage.getItem(SESSION_FLAG) === '1';
+const setSessionFlag = (): void => {
+	if (typeof document !== 'undefined') sessionStorage.setItem(SESSION_FLAG, '1');
+};
+const clearSessionFlag = (): void => {
+	if (typeof document !== 'undefined') sessionStorage.removeItem(SESSION_FLAG);
+};
+
 const parseAuthError = (err: unknown): AuthError => {
 	if (typeof err === 'object' && err !== null && 'data' in err) {
 		const data = (err as { data?: unknown }).data;
@@ -42,14 +52,19 @@ export const authError = errorStore;
 export const loadMe = async () => {
 	try {
 		loadingStore.set(true);
+		if (!hasSessionFlag()) {
+			userStore.set(null);
+			errorStore.set(null);
+			return;
+		}
 		const { data } = await api.get<{ user: User }>('/api/me');
 		userStore.set(data.user);
 		errorStore.set(null);
 	} catch (err) {
 		userStore.set(null);
-		// 401 = non connecté, état normal → ne pas afficher d'erreur
 		const status = err && typeof err === 'object' && 'status' in err ? (err as { status: number }).status : 0;
 		if (status === 401) {
+			clearSessionFlag();
 			errorStore.set(null);
 		} else {
 			errorStore.set(parseAuthError(err));
@@ -64,6 +79,7 @@ export const login = async (email: string, password: string): Promise<boolean> =
 		loadingStore.set(true);
 		errorStore.set(null);
 		await api.post('/api/login', { email, password });
+		setSessionFlag();
 		await loadMe();
 		return true;
 	} catch (err) {
@@ -89,6 +105,7 @@ export const register = async (payload: {
 		errorStore.set(null);
 		const { data } = await api.post<{ user: User }>('/api/register', payload);
 		userStore.set(data.user);
+		setSessionFlag();
 	} catch (err) {
 		userStore.set(null);
 		errorStore.set(parseAuthError(err));
@@ -102,6 +119,7 @@ export const logout = async () => {
 		loadingStore.set(true);
 		errorStore.set(null);
 		await api.post('/api/logout', {});
+		clearSessionFlag();
 		userStore.set(null);
 	} catch (err) {
 		errorStore.set(parseAuthError(err));
@@ -128,6 +146,7 @@ export const deleteMe = async () => {
 		loadingStore.set(true);
 		errorStore.set(null);
 		await api.delete('/api/me');
+		clearSessionFlag();
 		userStore.set(null);
 	} catch (err) {
 		errorStore.set(parseAuthError(err));
