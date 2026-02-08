@@ -47,7 +47,13 @@ export const loadMe = async () => {
 		errorStore.set(null);
 	} catch (err) {
 		userStore.set(null);
-		errorStore.set(parseAuthError(err));
+		// 401 = non connecté, état normal → ne pas afficher d'erreur
+		const status = err && typeof err === 'object' && 'status' in err ? (err as { status: number }).status : 0;
+		if (status === 401) {
+			errorStore.set(null);
+		} else {
+			errorStore.set(parseAuthError(err));
+		}
 	} finally {
 		loadingStore.set(false);
 	}
