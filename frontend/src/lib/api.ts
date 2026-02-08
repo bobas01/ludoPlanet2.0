@@ -1,4 +1,7 @@
-export const BASE_URL ='http://72.60.189.212:8000'
+
+export const BASE_URL =
+	(typeof import.meta.env !== 'undefined' && import.meta.env.VITE_API_URL) ||
+	'http://localhost:8000'
 
 type ApiError = Error & { status?: number; data?: unknown };
 

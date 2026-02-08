@@ -12,12 +12,13 @@ parameters:
     stripe_secret_key: "%env(STRIPE_SECRET_KEY)%"
     stripe_webhook_secret: "%env(STRIPE_WEBHOOK_SECRET)%"
     frontend_url: "%env(FRONTEND_URL)%"
-    # Origines CORS supplémentaires (prod) : définir CORS_ALLOWED_ORIGINS dans .env
+    # Origines CORS : en prod, CORS_ALLOWED_ORIGINS optionnel (défaut vide)
     cors_allowed_origins: ''
+    env_cors_default: ''
 
 when@prod:
     parameters:
-        cors_allowed_origins: "%env(CORS_ALLOWED_ORIGINS)%"
+        cors_allowed_origins: "%env(default:env_cors_default:CORS_ALLOWED_ORIGINS)%"
 
 services:
     # default configuration for services in *this* file

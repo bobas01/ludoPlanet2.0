@@ -42,7 +42,8 @@ final class CorsEventSubscriber implements EventSubscriberInterface
     {
         return [
             KernelEvents::REQUEST  => ['onKernelRequest', 100],
-            KernelEvents::RESPONSE => ['onKernelResponse', 100],
+            // Priorité basse pour ajouter CORS en dernier (éviter qu'un autre listener écrase les en-têtes)
+            KernelEvents::RESPONSE => ['onKernelResponse', -512],
         ];
     }
 
