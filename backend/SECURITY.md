@@ -27,8 +27,7 @@
 
 ### CORS
 
-- **OK** : Nelmio CORS (`nelmio/cors-bundle`) n’autorise que les origines définies (liste par défaut en dev ; en prod via `CORS_ALLOWED_ORIGINS`).
-- **Prod** : définir `CORS_ALLOWED_ORIGINS` dans `.env` (liste complète des origines autorisées, séparées par des virgules, ex. `https://mondomaine.com` ou les mêmes que en dev).
+- **OK** : Nelmio CORS (`nelmio/cors-bundle`) n’autorise que les origines définies dans `cors_origins` (même liste en dev, test et prod : localhost, 72.60.189.212:3500, etc.).
 
 ### Logs
 

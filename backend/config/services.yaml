@@ -12,18 +12,13 @@ parameters:
     stripe_secret_key: "%env(STRIPE_SECRET_KEY)%"
     stripe_webhook_secret: "%env(STRIPE_WEBHOOK_SECRET)%"
     frontend_url: "%env(FRONTEND_URL)%"
-    # Origines CORS (Nelmio) : liste par défaut en dev/test.
+    # Origines CORS (Nelmio) : même liste en dev, test et prod (pas de surcharge par env en prod).
     cors_origins:
         - 'http://localhost:5173'
         - 'http://127.0.0.1:5173'
         - 'http://localhost:4173'
         - 'http://127.0.0.1:4173'
         - 'http://72.60.189.212:3500'
-
-when@prod:
-    parameters:
-        # En prod : définir CORS_ALLOWED_ORIGINS (origines séparées par des virgules) pour surcharger.
-        cors_origins: '%env(csv:CORS_ALLOWED_ORIGINS)%'
 
 services:
     # default configuration for services in *this* file
