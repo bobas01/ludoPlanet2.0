@@ -28,6 +28,7 @@ final class LogoutController
             Cookie::SAMESITE_LAX
         ));
         } catch (\Exception $e) {
+            error_log($e->getMessage());
             return new JsonResponse([
                 'error' => 'An error occurred while logging out.',
             ], Response::HTTP_INTERNAL_SERVER_ERROR);

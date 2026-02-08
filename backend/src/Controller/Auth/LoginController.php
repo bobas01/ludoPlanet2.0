@@ -18,6 +18,7 @@ final class LoginController
                 'error' => 'Login endpoint is handled by the security firewall.',
             ], Response::HTTP_BAD_REQUEST);
         } catch (\Exception $e) {
+            error_log($e->getMessage());
             return new JsonResponse([
                 'error' => 'An error occurred while logging in.',
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
