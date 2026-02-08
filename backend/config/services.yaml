@@ -12,12 +12,6 @@ parameters:
     stripe_secret_key: "%env(STRIPE_SECRET_KEY)%"
     stripe_webhook_secret: "%env(STRIPE_WEBHOOK_SECRET)%"
     frontend_url: "%env(FRONTEND_URL)%"
-    cors_origins:
-        - "http://localhost:5173"
-        - "http://127.0.0.1:5173"
-        - "http://localhost:4173"
-        - "http://127.0.0.1:4173"
-        - "http://72.60.189.212:3500"
 
 services:
     # default configuration for services in *this* file
