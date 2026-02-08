@@ -42,8 +42,7 @@ final class CorsEventSubscriber implements EventSubscriberInterface
     {
         return [
             KernelEvents::REQUEST  => ['onKernelRequest', 100],
-            // Priorité basse pour ajouter CORS en dernier (éviter qu'un autre listener écrase les en-têtes)
-            KernelEvents::RESPONSE => ['onKernelResponse', -512],
+            KernelEvents::RESPONSE => ['onKernelResponse', 255],
         ];
     }
 
@@ -75,6 +74,16 @@ final class CorsEventSubscriber implements EventSubscriberInterface
 
         $request = $event->getRequest();
         $origin = self::normalizeOrigin($request->headers->get('Origin', ''));
+
+        // Si le proxy (Dockploy/Traefik) ne transmet pas Origin, déduire l’origine frontend connue
+        if ($origin === '') {
+            $host = $request->getHost();
+            if ($host === '72.60.189.212') {
+                $origin = 'http://72.60.189.212:3500';
+            } elseif ($host === 'localhost' || $host === '127.0.0.1') {
+                $origin = 'http://localhost:5173';
+            }
+        }
 
         if ($origin === '' || !in_array($origin, $this->allowedOrigins, true)) {
             return;
