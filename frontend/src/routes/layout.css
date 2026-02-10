@@ -123,6 +123,8 @@
   }
   body {
     @apply bg-background text-foreground;
+    /* Police par défaut pour tous les textes (paragraphes, inputs, boutons...) */
+    font-family: var(--font-body);
   }
   a[href],
   button,
@@ -135,9 +137,11 @@
 
 @layer utilities {
   .font-title {
+    /* Police dédiée aux titres / éléments importants */
     font-family: var(--font-title);
   }
   .font-body {
+    /* Police dédiée aux textes courants si besoin de forcer localement */
     font-family: var(--font-body);
   }
 }
