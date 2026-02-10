@@ -9,6 +9,6 @@
 
 <div class={className}>
 	<div class="w-full">
-		<img class="h-auto w-full object-cover" src={image} alt="Publicité" />
+		<img class="h-56 w-full sm:h-64 lg:h-72" src={image} alt="Publicité" />
 	</div>
 </div>
