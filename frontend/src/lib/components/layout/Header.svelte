@@ -11,9 +11,9 @@
 	import logoConnectionBois from '$lib/assets/icons/logoConnectionBois.png';
 	import panier from '$lib/assets/icons/panier.png';
 	import burger from '$lib/assets/icons/burger.png';
-	import carouselPublicitaire1 from '$lib/assets/images/7WDULARGE.jpg';
-	import carouselPublicitaire2 from '$lib/assets/images/MarvelChampions.jpg';
-	import carouselPublicitaire3 from '$lib/assets/images/teraformingMars.jpg';
+	import carouselPublicitaire1 from '$lib/assets/images/7wondersDuelbanner.png';
+	import carouselPublicitaire2 from '$lib/assets/images/MarvelChampions.png';
+	import carouselPublicitaire3 from '$lib/assets/images/TerraformingMars_banner.png';
 
 	const menuItems = [
 		{ label: 'Tous les jeux', href: '/games' },
