@@ -69,4 +69,9 @@
 			{#if $authLoading}Connexion...{:else}Se connecter{/if}
 		</button>
 	</form>
+
+	<p class="mt-4 text-center text-sm text-slate-600">
+		Pas encore de compte ?
+		<a href="/register" class="font-medium text-amber-700 hover:underline">Créer un compte</a>
+	</p>
 </div>

@@ -124,6 +124,13 @@
   body {
     @apply bg-background text-foreground;
   }
+  a[href],
+  button,
+  [role="button"],
+  input[type="button"],
+  input[type="submit"] {
+    cursor: pointer;
+  }
 }
 
 @layer utilities {

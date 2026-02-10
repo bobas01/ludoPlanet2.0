@@ -10,6 +10,12 @@
 	let birthDate = '';
 	let submitted = false;
 
+	const specialPattern = /[!@#$%^&*()_+\-=\[\]{};:'",.<>\/?\\|`~]/;
+
+	$: hasMinLength = password.length >= 12;
+	$: hasUppercase = /[A-Z]/.test(password);
+	$: hasSpecial = specialPattern.test(password);
+
 	const handleSubmit = async (event: Event) => {
 		event.preventDefault();
 		submitted = true;
@@ -93,12 +99,29 @@
 					>Mot de passe</label
 				>
 				<input
-					class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+					class="mt-1 w-full rounded-md border px-3 py-2 text-sm {submitted &&
+					(!hasMinLength || !hasUppercase || !hasSpecial)
+						? 'border-red-400'
+						: 'border-slate-300'}"
 					type="password"
 					id="register-password"
 					bind:value={password}
 					required
 				/>
+				<ul class="mt-2 space-y-1 text-xs">
+					<li class="flex items-center gap-1 {hasMinLength ? 'text-green-700' : 'text-red-600'}">
+						<span>{hasMinLength ? '✓' : '✗'}</span>
+						<span>Au moins 12 caractères</span>
+					</li>
+					<li class="flex items-center gap-1 {hasUppercase ? 'text-green-700' : 'text-red-600'}">
+						<span>{hasUppercase ? '✓' : '✗'}</span>
+						<span>Au moins une lettre majuscule</span>
+					</li>
+					<li class="flex items-center gap-1 {hasSpecial ? 'text-green-700' : 'text-red-600'}">
+						<span>{hasSpecial ? '✓' : '✗'}</span>
+						<span>Au moins un caractère spécial autorisé</span>
+					</li>
+				</ul>
 			</div>
 		</div>
 
@@ -119,4 +142,9 @@
 			{#if $authLoading}Création...{:else}Créer un compte{/if}
 		</button>
 	</form>
+
+	<p class="mt-4 text-center text-sm text-slate-600">
+		Déjà un compte ?
+		<a href="/login" class="font-medium text-amber-700 hover:underline">Se connecter</a>
+	</p>
 </div>

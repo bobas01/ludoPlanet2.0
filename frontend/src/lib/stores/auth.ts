@@ -84,7 +84,16 @@ export const login = async (email: string, password: string): Promise<boolean> =
 		return true;
 	} catch (err) {
 		userStore.set(null);
-		errorStore.set(parseAuthError(err));
+		const status =
+			err && typeof err === 'object' && 'status' in err
+				? (err as { status: number }).status
+				: 0;
+
+		if (status === 401) {
+			errorStore.set({ message: "Adresse e-mail ou mot de passe incorrect." });
+		} else {
+			errorStore.set(parseAuthError(err));
+		}
 		return false;
 	} finally {
 		loadingStore.set(false);
