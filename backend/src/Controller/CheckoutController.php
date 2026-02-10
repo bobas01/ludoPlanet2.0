@@ -95,20 +95,27 @@ final class CheckoutController extends AbstractController
         $this->entityManager->persist($order);
         $this->entityManager->flush();
 
-        \Stripe\Stripe::setApiKey($this->stripeSecretKey);
+        try {
+            \Stripe\Stripe::setApiKey($this->stripeSecretKey);
 
-        $successUrl = rtrim($this->frontendUrl, '/') . '/cart/success?session_id={CHECKOUT_SESSION_ID}';
-        $cancelUrl = rtrim($this->frontendUrl, '/') . '/cart?payment=cancelled';
+            $successUrl = rtrim($this->frontendUrl, '/') . '/cart/success?session_id={CHECKOUT_SESSION_ID}';
+            $cancelUrl = rtrim($this->frontendUrl, '/') . '/cart?payment=cancelled';
 
-        $session = \Stripe\Checkout\Session::create([
-            'mode' => 'payment',
-            'line_items' => $lineItems,
-            'success_url' => $successUrl,
-            'cancel_url' => $cancelUrl,
-            'metadata' => [
-                'order_id' => (string) $order->getId(),
-            ],
-        ]);
+            $session = \Stripe\Checkout\Session::create([
+                'mode' => 'payment',
+                'line_items' => $lineItems,
+                'success_url' => $successUrl,
+                'cancel_url' => $cancelUrl,
+                'metadata' => [
+                    'order_id' => (string) $order->getId(),
+                ],
+            ]);
+        } catch (\Throwable $e) {
+            // On évite d'exposer le message Stripe brut au client.
+            return $this->json([
+                'error' => 'Une erreur est survenue lors de la création de la session de paiement.',
+            ], Response::HTTP_BAD_GATEWAY);
+        }
 
         $order->setStripeSessionId($session->id);
         $this->entityManager->flush();

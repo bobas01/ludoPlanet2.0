@@ -151,6 +151,7 @@ final class OrderController
     }
 
     #[Route('/api/orders', name: 'api_orders_create', methods: ['POST'])]
+    #[IsGranted('ROLE_ADMIN')]
     public function create(Request $request): Response
     {
         $data = json_decode($request->getContent(), true);
@@ -182,6 +183,7 @@ final class OrderController
     }
 
     #[Route('/api/orders/{id}', name: 'api_orders_update', requirements: ['id' => '\d+'], methods: ['PUT'])]
+    #[IsGranted('ROLE_ADMIN')]
     public function update(int $id, Request $request): Response
     {
         $order = $this->orderRepository->find($id);
@@ -206,6 +208,7 @@ final class OrderController
     }
 
     #[Route('/api/orders/{id}', name: 'api_orders_delete', requirements: ['id' => '\d+'], methods: ['DELETE'])]
+    #[IsGranted('ROLE_ADMIN')]
     public function delete(int $id): Response
     {
         $order = $this->orderRepository->find($id);
