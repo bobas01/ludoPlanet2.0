@@ -40,7 +40,7 @@ final class MeController
                 'lastName' => $user->getLastName(),
                 'address' => $user->getAddress(),
                 'phoneNumber' => $user->getPhoneNumber(),
-                'birthDate' => $user->getBirthDate()->format('Y-m-d'),
+                'birthDate' => $user->getBirthDate()?->format('Y-m-d'),
             ],
         ]);
     }
@@ -151,7 +151,7 @@ final class MeController
                 'lastName' => $user->getLastName(),
                 'address' => $user->getAddress(),
                 'phoneNumber' => $user->getPhoneNumber(),
-                'birthDate' => $user->getBirthDate()->format('Y-m-d'),
+                'birthDate' => $user->getBirthDate()?->format('Y-m-d'),
             ],
         ]);
     }

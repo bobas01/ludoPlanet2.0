@@ -123,7 +123,8 @@
   }
   body {
     @apply bg-background text-foreground;
-   font-family: var(--font-body);
+    font-family: var(--font-body);
+   overflow-x: hidden;
   }
   a[href],
   button,

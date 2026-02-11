@@ -26,20 +26,20 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(name: 'password_hash', type: 'string', length: 255)]
     private string $passwordHash;
 
-    #[ORM\Column(name: 'first_name', type: 'string', length: 100)]
-    private string $firstName;
+    #[ORM\Column(name: 'first_name', type: 'string', length: 100, nullable: true)]
+    private ?string $firstName = null;
 
-    #[ORM\Column(name: 'last_name', type: 'string', length: 100)]
-    private string $lastName;
+    #[ORM\Column(name: 'last_name', type: 'string', length: 100, nullable: true)]
+    private ?string $lastName = null;
 
-    #[ORM\Column(type: 'string', length: 255)]
-    private string $address;
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    private ?string $address = null;
 
-    #[ORM\Column(name: 'phone_number', type: 'string', length: 30)]
-    private string $phoneNumber;
+    #[ORM\Column(name: 'phone_number', type: 'string', length: 30, nullable: true)]
+    private ?string $phoneNumber = null;
 
-    #[ORM\Column(name: 'birth_date', type: 'date_immutable')]
-    private \DateTimeImmutable $birthDate;
+    #[ORM\Column(name: 'birth_date', type: 'date_immutable', nullable: true)]
+    private ?\DateTimeImmutable $birthDate = null;
 
     #[ORM\Column(type: 'json')]
     private array $roles = [];
@@ -94,7 +94,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getFirstName(): string
+    public function getFirstName(): ?string
     {
         return $this->firstName;
     }
@@ -105,7 +105,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getLastName(): string
+    public function getLastName(): ?string
     {
         return $this->lastName;
     }
@@ -116,7 +116,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getAddress(): string
+    public function getAddress(): ?string
     {
         return $this->address;
     }
@@ -127,7 +127,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getPhoneNumber(): string
+    public function getPhoneNumber(): ?string
     {
         return $this->phoneNumber;
     }
@@ -138,7 +138,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getBirthDate(): \DateTimeImmutable
+    public function getBirthDate(): ?\DateTimeImmutable
     {
         return $this->birthDate;
     }

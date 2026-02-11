@@ -66,28 +66,6 @@ final class RegisterController
             ], Response::HTTP_BAD_REQUEST);
         }
 
-        if ($firstName === '' || $lastName === '') {
-            return new JsonResponse(['error' => 'Prénom et nom requis.'], Response::HTTP_BAD_REQUEST);
-        }
-
-        if ($address === '') {
-            return new JsonResponse(['error' => 'Adresse requise.'], Response::HTTP_BAD_REQUEST);
-        }
-
-        if ($phoneNumber === '') {
-            return new JsonResponse(['error' => 'Numéro de téléphone requis.'], Response::HTTP_BAD_REQUEST);
-        }
-
-        $birthDate = \DateTimeImmutable::createFromFormat('Y-m-d', $birthDateInput);
-        if ($birthDate === false) {
-            return new JsonResponse(['error' => 'Date de naissance invalide (YYYY-MM-DD).'], Response::HTTP_BAD_REQUEST);
-        }
-
-        $age = $birthDate->diff(new \DateTimeImmutable('today'))->y;
-        if ($age < 18) {
-            return new JsonResponse(['error' => 'Vous devez être majeur pour créer un compte.'], Response::HTTP_BAD_REQUEST);
-        }
-
         if ($this->userRepository->findOneBy(['email' => $email]) !== null) {
             return new JsonResponse(['error' => 'Email déjà utilisé.'], Response::HTTP_CONFLICT);
         }
@@ -96,11 +74,25 @@ final class RegisterController
         $passwordHash = $this->passwordHasher->hashPassword($user, $password);
         $user->setPasswordHash($passwordHash);
         $user->setRoles(['ROLE_USER']);
-        $user->setFirstName($firstName);
-        $user->setLastName($lastName);
-        $user->setAddress($address);
-        $user->setPhoneNumber($phoneNumber);
-        $user->setBirthDate($birthDate);
+        if ($firstName !== '') {
+            $user->setFirstName($firstName);
+        }
+        if ($lastName !== '') {
+            $user->setLastName($lastName);
+        }
+        if ($address !== '') {
+            $user->setAddress($address);
+        }
+        if ($phoneNumber !== '') {
+            $user->setPhoneNumber($phoneNumber);
+        }
+        if ($birthDateInput !== '') {
+            $birthDate = \DateTimeImmutable::createFromFormat('Y-m-d', $birthDateInput);
+            if ($birthDate === false) {
+                return new JsonResponse(['error' => 'Date de naissance invalide (YYYY-MM-DD).'], Response::HTTP_BAD_REQUEST);
+            }
+            $user->setBirthDate($birthDate);
+        }
 
         $this->entityManager->persist($user);
         $this->entityManager->flush();
@@ -121,7 +113,7 @@ final class RegisterController
                 'lastName' => $user->getLastName(),
                 'address' => $user->getAddress(),
                 'phoneNumber' => $user->getPhoneNumber(),
-                'birthDate' => $user->getBirthDate()->format('Y-m-d'),
+                'birthDate' => $user->getBirthDate()?->format('Y-m-d'),
             ],
         ], Response::HTTP_CREATED);
     }

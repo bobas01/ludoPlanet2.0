@@ -18,9 +18,21 @@
 	let sortBy = $state<SortOption>('rating');
 	let currentPage = $state(1);
 
+	// Synchronise l'état initial avec l'URL pour permettre le partage de lien
 	$effect(() => {
-		const categoryParam = $page.url.searchParams.get('category');
+		const url = $page.url;
+
+		const categoryParam = url.searchParams.get('category');
 		selectedCategory = categoryParam;
+
+		const sortParam = url.searchParams.get('sort');
+		if (sortParam === 'players' || sortParam === 'rating' || sortParam === 'time') {
+			sortBy = sortParam;
+		}
+
+		const pageParam = url.searchParams.get('page');
+		const pageFromUrl = pageParam ? Number.parseInt(pageParam, 10) : 1;
+		currentPage = Number.isNaN(pageFromUrl) || pageFromUrl < 1 ? 1 : pageFromUrl;
 	});
 
 	let categories = $derived(
@@ -60,11 +72,6 @@
 	);
 
 	$effect(() => {
-		selectedCategory;
-		sortBy;
-		currentPage = 1;
-	});
-	$effect(() => {
 		if (currentPage > totalPages) {
 			currentPage = totalPages;
 		}
@@ -81,27 +88,58 @@
 		}
 	});
 
-	function handlePrev() {
-		currentPage = Math.max(1, currentPage - 1);
-	}
-	function handleNext() {
-		currentPage = Math.min(totalPages, currentPage + 1);
-	}
-
-	function setCategory(cat: string | null) {
-		selectedCategory = cat;
+	function updateUrl(params: { category?: string | null; sort?: SortOption | null; page?: number }) {
 		const url = new URL($page.url);
-		if (cat) {
-			url.searchParams.set('category', cat);
-		} else {
-			url.searchParams.delete('category');
+
+		if (params.category !== undefined) {
+			if (params.category) {
+				url.searchParams.set('category', params.category);
+			} else {
+				url.searchParams.delete('category');
+			}
 		}
+
+		if (params.sort !== undefined) {
+			if (params.sort) {
+				url.searchParams.set('sort', params.sort);
+			} else {
+				url.searchParams.delete('sort');
+			}
+		}
+
+		if (params.page !== undefined) {
+			url.searchParams.set('page', String(params.page));
+		}
+
 		const query = url.searchParams.toString();
 		goto(query ? `${url.pathname}?${query}` : url.pathname, {
 			replaceState: true,
 			keepFocus: true,
 			noScroll: true
 		});
+	}
+
+	function handlePrev() {
+		const nextPage = Math.max(1, currentPage - 1);
+		currentPage = nextPage;
+		updateUrl({ page: nextPage });
+	}
+	function handleNext() {
+		const nextPage = Math.min(totalPages, currentPage + 1);
+		currentPage = nextPage;
+		updateUrl({ page: nextPage });
+	}
+
+	function setCategory(cat: string | null) {
+		selectedCategory = cat;
+		currentPage = 1;
+		updateUrl({ category: cat, page: 1 });
+	}
+
+	function setSort(option: SortOption) {
+		sortBy = option;
+		currentPage = 1;
+		updateUrl({ sort: option, page: 1 });
 	}
 </script>
 
@@ -130,7 +168,7 @@
 		{selectedCategory}
 		{sortBy}
 		onCategorySelect={(cat) => setCategory(cat)}
-		onSortChange={(s) => (sortBy = s)}
+		onSortChange={setSort}
 	/>
 
 	{#if filteredAndSortedGames.length === 0}

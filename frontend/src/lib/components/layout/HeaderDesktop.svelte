@@ -81,7 +81,7 @@
 
 		const term = searchTerm.toLowerCase();
 		searchResults = allGames.filter((g) => g.name.toLowerCase().includes(term)).slice(0, 8);
-		searchOpen = searchResults.length > 0;
+		searchOpen = true;
 	};
 
 	const handleSearchSubmit = (event: Event) => {
@@ -124,8 +124,43 @@
 						>
 							<img class="h-6 w-6" src={loupe} alt="Search" />
 						</Button>
-					</form>
 
+						{#if searchOpen}
+							<div
+								class="absolute left-0 right-0 z-40 mt-2 flex justify-end"
+								aria-label="Résultats de la recherche"
+							>
+								<div
+									class="w-[360px] rounded-2xl border border-slate-200 bg-white/95 p-2 text-sm text-slate-800 shadow-lg backdrop-blur"
+								>
+									{#if searchResults.length === 0}
+										<p class="px-2 py-1 text-xs text-slate-500">
+											Aucun résultat pour « {searchTerm} ».
+										</p>
+									{:else}
+										<ul class="max-h-72 space-y-1 overflow-auto">
+											{#each searchResults as game}
+												<li>
+													<button
+														type="button"
+														class="flex w-full items-center justify-between rounded-lg px-2 py-1.5 text-left hover:bg-slate-100"
+														onclick={() => goToGame(game.bggId)}
+													>
+														<span class="truncate">{game.name}</span>
+														{#if game.ratingAverage}
+															<span class="ml-2 shrink-0 text-[11px] text-slate-500">
+																⭐ {game.ratingAverage}
+															</span>
+														{/if}
+													</button>
+												</li>
+											{/each}
+										</ul>
+									{/if}
+								</div>
+							</div>
+						{/if}
+					</form>
 					<DropdownMenu>
 						<DropdownMenuTrigger class="relative">
 							<img class="h-[100px] w-[100px]" src={logoConnectionBois} alt="Compte" />
@@ -172,36 +207,6 @@
 					</a>
 				</div>
 			</div>
-			{#if searchOpen}
-				<div class="relative z-40 mt-2 flex justify-end" aria-label="Résultats de la recherche">
-					<div
-						class="w-[360px] rounded-2xl border border-slate-200 bg-white/95 p-2 text-sm text-slate-800 shadow-lg backdrop-blur"
-					>
-						{#if searchResults.length === 0}
-							<p class="px-2 py-1 text-xs text-slate-500">Aucun résultat.</p>
-						{:else}
-							<ul class="max-h-72 space-y-1 overflow-auto">
-								{#each searchResults as game}
-									<li>
-										<button
-											type="button"
-											class="flex w-full items-center justify-between rounded-lg px-2 py-1.5 text-left hover:bg-slate-100"
-											onclick={() => goToGame(game.bggId)}
-										>
-											<span class="truncate">{game.name}</span>
-											{#if game.ratingAverage}
-												<span class="ml-2 shrink-0 text-[11px] text-slate-500">
-													⭐ {game.ratingAverage}
-												</span>
-											{/if}
-										</button>
-									</li>
-								{/each}
-							</ul>
-						{/if}
-					</div>
-				</div>
-			{/if}
 		</div>
 	</div>
 	<div class="w-full bg-[var(--brand-dark)]">

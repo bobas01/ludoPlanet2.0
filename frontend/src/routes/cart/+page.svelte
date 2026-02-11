@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
-	import { replaceState } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { BASE_URL, api } from '$lib/api';
 	import iconCharriot from '$lib/assets/icons/iconCharriot.png';
@@ -34,41 +33,47 @@
 
 	let checkoutLoading = false;
 	let checkoutError = '';
-	// Dès le chargement : afficher le message si on revient de Stripe (URL ou sessionStorage après replaceState)
-	let showPaymentFailedMessage =
-		typeof window !== 'undefined' &&
-		(window.location.search.includes('payment=cancelled') ||
-			sessionStorage.getItem(PAYMENT_CANCELLED_KEY) === '1');
+	$: showPaymentCancelledFromUrl =
+		typeof window !== 'undefined' && $page.url.searchParams.get('payment') === 'cancelled';
 
-	$: if (typeof window !== 'undefined' && $page.url.searchParams.get('payment') === 'cancelled') {
-		showPaymentFailedMessage = true;
+	$: if (showPaymentCancelledFromUrl) {
 		try {
 			sessionStorage.setItem(PAYMENT_CANCELLED_KEY, '1');
 		} catch {}
 	}
 
+	$: showPaymentFailedMessage =
+		showPaymentCancelledFromUrl ||
+		(typeof window !== 'undefined' && sessionStorage.getItem(PAYMENT_CANCELLED_KEY) === '1');
+
 	onMount(() => {
 		if ($page.url.searchParams.get('payment') === 'cancelled') {
-			showPaymentFailedMessage = true;
-			sessionStorage.setItem(PAYMENT_CANCELLED_KEY, '1');
-			replaceState('/cart', {});
+			try {
+				sessionStorage.setItem(PAYMENT_CANCELLED_KEY, '1');
+			} catch {}
+			if (typeof history !== 'undefined' && history.replaceState) {
+				history.replaceState(history.state ?? null, '', $page.url.pathname);
+			}
 		}
 	});
-
-	// Ne plus afficher le message à la prochaine tentative de paiement
-	function dismissPaymentFailedMessage() {
-		showPaymentFailedMessage = false;
-		if (typeof sessionStorage !== 'undefined') sessionStorage.removeItem(PAYMENT_CANCELLED_KEY);
-	}
 
 	async function handleCheckout() {
 		if ($cartItems.length === 0) return;
 		if (!$authUser) {
-			goto('/login');
+			goto('/login?redirect=/cart');
+			return;
+		}
+		const missingProfile =
+			!$authUser.firstName ||
+			!$authUser.lastName ||
+			!$authUser.address ||
+			!$authUser.phoneNumber ||
+			!$authUser.birthDate;
+		if (missingProfile) {
+		goto('/me?from=checkout');
 			return;
 		}
 		checkoutError = '';
-		dismissPaymentFailedMessage();
 		checkoutLoading = true;
 		try {
 			const payload = {
@@ -104,18 +109,10 @@
 
 	{#if showPaymentFailedMessage}
 		<div
-			class="mt-4 flex items-center justify-between gap-4 rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800"
+			class="mt-4 rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800"
 			role="alert"
 		>
-			<span>Paiement échoué ou annulé. Réessayez de payer.</span>
-			<button
-				type="button"
-				class="shrink-0 text-amber-700 underline hover:no-underline"
-				onclick={dismissPaymentFailedMessage}
-				aria-label="Fermer le message"
-			>
-				Fermer
-			</button>
+			Paiement échoué ou annulé. Réessayez de payer.
 		</div>
 	{/if}
 

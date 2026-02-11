@@ -103,21 +103,23 @@ export const login = async (email: string, password: string): Promise<boolean> =
 export const register = async (payload: {
 	email: string;
 	password: string;
-	firstName: string;
-	lastName: string;
-	address: string;
-	phoneNumber: string;
-	birthDate: string;
-}) => {
+	firstName?: string;
+	lastName?: string;
+	address?: string;
+	phoneNumber?: string;
+	birthDate?: string;
+}): Promise<boolean> => {
 	try {
 		loadingStore.set(true);
 		errorStore.set(null);
 		const { data } = await api.post<{ user: User }>('/api/register', payload);
 		userStore.set(data.user);
 		setSessionFlag();
+		return true;
 	} catch (err) {
 		userStore.set(null);
 		errorStore.set(parseAuthError(err));
+		return false;
 	} finally {
 		loadingStore.set(false);
 	}

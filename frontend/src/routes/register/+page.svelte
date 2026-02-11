@@ -1,13 +1,9 @@
 <script lang="ts">
 	import { authError, authLoading, register } from '$lib/stores/auth';
+	import { goto } from '$app/navigation';
 
 	let email = '';
 	let password = '';
-	let firstName = '';
-	let lastName = '';
-	let address = '';
-	let phoneNumber = '';
-	let birthDate = '';
 	let submitted = false;
 
 	const specialPattern = /[!@#$%^&*()_+\-=\[\]{};:'",.<>\/?\\|`~]/;
@@ -19,7 +15,11 @@
 	const handleSubmit = async (event: Event) => {
 		event.preventDefault();
 		submitted = true;
-		await register({ email, password, firstName, lastName, address, phoneNumber, birthDate });
+		const success = await register({ email, password });
+		if (success) {
+			// Après inscription, rediriger vers le profil avec un message d'aide pour le paiement
+			await goto('/me?from=register');
+		}
 	};
 </script>
 
@@ -28,62 +28,7 @@
 	<p class="mt-2 text-sm text-slate-600">Créez votre compte pour acheter en ligne.</p>
 
 	<form class="mt-6 space-y-4" onsubmit={handleSubmit}>
-		<div class="grid gap-4 sm:grid-cols-2">
-			<div>
-				<label class="text-sm font-medium text-slate-700" for="register-first-name">Prénom</label>
-				<input
-					class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
-					id="register-first-name"
-					bind:value={firstName}
-					required
-				/>
-			</div>
-			<div>
-				<label class="text-sm font-medium text-slate-700" for="register-last-name">Nom</label>
-				<input
-					class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
-					id="register-last-name"
-					bind:value={lastName}
-					required
-				/>
-			</div>
-		</div>
-
-		<div>
-			<label class="text-sm font-medium text-slate-700" for="register-address">Adresse</label>
-			<input
-				class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
-				id="register-address"
-				bind:value={address}
-				required
-			/>
-		</div>
-
-		<div class="grid gap-4 sm:grid-cols-2">
-			<div>
-				<label class="text-sm font-medium text-slate-700" for="register-phone">Téléphone</label>
-				<input
-					class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
-					id="register-phone"
-					bind:value={phoneNumber}
-					required
-				/>
-			</div>
-			<div>
-				<label class="text-sm font-medium text-slate-700" for="register-birth-date">
-					Date de naissance
-				</label>
-				<input
-					class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
-					type="date"
-					id="register-birth-date"
-					bind:value={birthDate}
-					required
-				/>
-			</div>
-		</div>
-
-		<div class="grid gap-4 sm:grid-cols-2">
+		<div class="space-y-4">
 			<div>
 				<label class="text-sm font-medium text-slate-700" for="register-email">Email</label>
 				<input
