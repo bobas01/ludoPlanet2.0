@@ -61,7 +61,7 @@
 <article
 	class="group flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-[var(--brand-accent)]/40 hover:shadow-lg"
 >
-	<a href="/games/{game.bggId}" class="block">
+	<a href="/games/{game.slug}" class="block">
 		<div
 			class="relative flex h-36 items-center justify-center overflow-hidden bg-linear-to-br from-[color:var(--brand-accent)]/15 via-[color:var(--brand-accent)]/5 to-slate-100 sm:h-40"
 		>
@@ -88,7 +88,7 @@
 	</a>
 
 	<div class="flex flex-1 flex-col p-4 sm:p-5">
-		<a href="/games/{game.bggId}" class="block">
+		<a href="/games/{game.slug}" class="block">
 			<h2
 				class="line-clamp-2 text-lg leading-snug font-bold text-slate-800 transition-colors group-hover:text-[var(--brand-accent)]"
 			>

@@ -1,5 +1,6 @@
 export type Game = {
 	bggId: number;
+	slug: string;
 	name: string;
 	yearPublished: number | null;
 	minPlayers: number | null;

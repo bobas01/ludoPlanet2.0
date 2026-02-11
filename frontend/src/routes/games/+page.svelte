@@ -18,8 +18,7 @@
 	let sortBy = $state<SortOption>('rating');
 	let currentPage = $state(1);
 
-	// Synchronise l'état initial avec l'URL pour permettre le partage de lien
-	$effect(() => {
+$effect(() => {
 		const url = $page.url;
 
 		const categoryParam = url.searchParams.get('category');

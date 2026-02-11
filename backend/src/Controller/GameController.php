@@ -21,9 +21,21 @@ final class GameController
         ]);
     }
 
-    #[Route('/games/{id}', name: 'app_game_show', requirements: ['id' => '\d+'])]
-    public function show(int $id, GameRepository $gameRepository): Response
+    #[Route('/games/{slug}', name: 'app_game_show')]
+    public function show(string $slug, GameRepository $gameRepository): Response
     {
+        // Supporte soit un slug "name-bggId", soit l'ancien format numérique "12345"
+        $id = null;
+        if (preg_match('/-(\d+)$/', $slug, $matches)) {
+            $id = (int) $matches[1];
+        } elseif (ctype_digit($slug)) {
+            $id = (int) $slug;
+        }
+
+        if ($id === null) {
+            return new JsonResponse(['error' => 'Jeu non trouvé'], Response::HTTP_NOT_FOUND);
+        }
+
         $game = $gameRepository->find($id);
 
         if ($game === null) {
@@ -57,6 +69,7 @@ final class GameController
 
         return [
             'bggId' => $game->getBggId(),
+            'slug' => $this->makeSlug($game),
             'name' => $game->getName(),
             'yearPublished' => $game->getYearPublished(),
             'minPlayers' => $game->getMinPlayers(),
@@ -74,5 +87,15 @@ final class GameController
             'images' => $images,
             'primaryImageUrl' => $primaryImageUrl,
         ];
+    }
+
+    private function makeSlug(Game $game): string
+    {
+        $base = strtolower(trim(preg_replace('/[^A-Za-z0-9]+/', '-', $game->getName()) ?? '', '-'));
+        if ($base === '') {
+            $base = 'game';
+        }
+
+        return sprintf('%s-%d', $base, $game->getBggId());
     }
 }
