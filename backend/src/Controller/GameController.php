@@ -24,7 +24,6 @@ final class GameController
     #[Route('/games/{slug}', name: 'app_game_show')]
     public function show(string $slug, GameRepository $gameRepository): Response
     {
-        // Supporte soit un slug "name-bggId", soit l'ancien format numérique "12345"
         $id = null;
         if (preg_match('/-(\d+)$/', $slug, $matches)) {
             $id = (int) $matches[1];
