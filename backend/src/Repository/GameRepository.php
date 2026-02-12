@@ -13,4 +13,9 @@ class GameRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, Game::class);
     }
+
+    public function findOneBySlug(string $slug): ?Game
+    {
+        return $this->findOneBy(['slug' => $slug], null);
+    }
 }

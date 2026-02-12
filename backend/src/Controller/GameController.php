@@ -24,18 +24,21 @@ final class GameController
     #[Route('/games/{slug}', name: 'app_game_show')]
     public function show(string $slug, GameRepository $gameRepository): Response
     {
-        $id = null;
-        if (preg_match('/-(\d+)$/', $slug, $matches)) {
-            $id = (int) $matches[1];
-        } elseif (ctype_digit($slug)) {
-            $id = (int) $slug;
-        }
+        // 1) Recherche par slug en base (ex. /games/gloomhaven)
+        $game = $gameRepository->findOneBySlug($slug);
 
-        if ($id === null) {
-            return new JsonResponse(['error' => 'Jeu non trouvé'], Response::HTTP_NOT_FOUND);
+        // 2) Sinon, extraction de l'ID depuis le slug (ex. gloomhaven-174430 ou 174430)
+        if ($game === null) {
+            $id = null;
+            if (preg_match('/-(\d+)$/', $slug, $matches)) {
+                $id = (int) $matches[1];
+            } elseif (ctype_digit($slug)) {
+                $id = (int) $slug;
+            }
+            if ($id !== null) {
+                $game = $gameRepository->find($id);
+            }
         }
-
-        $game = $gameRepository->find($id);
 
         if ($game === null) {
             return new JsonResponse(['error' => 'Jeu non trouvé'], Response::HTTP_NOT_FOUND);
@@ -67,9 +70,8 @@ final class GameController
         }
 
         return [
-            // try to get the game from the database with the slug
             'bggId' => $game->getBggId(),
-            'slug' => $this->makeSlug($game),
+            'slug' => $game->getSlug() !== '' ? $game->getSlug() : $this->makeSlug($game),
             'name' => $game->getName(),
             'yearPublished' => $game->getYearPublished(),
             'minPlayers' => $game->getMinPlayers(),

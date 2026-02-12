@@ -28,7 +28,7 @@ final class AdminGameControllerTest extends AdminWebTestCase
 
     public function testIndexReturnsGamesWithDomainAndMechanicIds(): void
     {
-        $game = new Game(100, 'Test Game');
+        $game = new Game(100, 'Test Game', 'test-game-100');
         $game->addImage(new GameImage('/img/test.png', true));
         $this->entityManager->persist($game);
         $this->entityManager->flush();
@@ -101,7 +101,7 @@ final class AdminGameControllerTest extends AdminWebTestCase
 
     public function testCreateFailsWhenBggIdAlreadyExists(): void
     {
-        $game = new Game(99, 'Existing');
+        $game = new Game(99, 'Existing', 'existing-99');
         $game->addImage(new GameImage('/img/existing.png', true));
         $this->entityManager->persist($game);
         $this->entityManager->flush();
@@ -117,7 +117,7 @@ final class AdminGameControllerTest extends AdminWebTestCase
 
     public function testUpdateSuccess(): void
     {
-        $game = new Game(10, 'Old Name');
+        $game = new Game(10, 'Old Name', 'old-name-10');
         $game->addImage(new GameImage('/img/old.png', true));
         $this->entityManager->persist($game);
         $this->entityManager->flush();
@@ -145,7 +145,7 @@ final class AdminGameControllerTest extends AdminWebTestCase
 
     public function testDeleteSuccess(): void
     {
-        $game = new Game(20, 'To Delete');
+        $game = new Game(20, 'To Delete', 'to-delete-20');
         $game->addImage(new GameImage('/img/del.png', true));
         $this->entityManager->persist($game);
         $this->entityManager->flush();

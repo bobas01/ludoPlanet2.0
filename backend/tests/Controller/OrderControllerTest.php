@@ -120,7 +120,8 @@ final class OrderControllerTest extends AdminWebTestCase
 
     private function createGameWithImage(int $bggId, string $name, string $imageUrl): Game
     {
-        $game = new Game($bggId, $name);
+        $slug = strtolower(preg_replace('/[^A-Za-z0-9]+/', '-', $name)) . '-' . $bggId;
+        $game = new Game($bggId, $name, $slug);
         $image = new GameImage($imageUrl, true);
         $game->addImage($image);
 

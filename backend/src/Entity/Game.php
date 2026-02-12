@@ -24,6 +24,9 @@ class Game
     #[ORM\Column(type: 'string', length: 255)]
     private string $name;
 
+    #[ORM\Column(type: 'string', length: 255, unique: true)]
+    private string $slug;
+
     #[ORM\Column(name: 'year_published', type: 'integer', nullable: true)]
     private ?int $yearPublished = null;
 
@@ -81,10 +84,11 @@ class Game
     #[ORM\OneToMany(mappedBy: 'game', targetEntity: GameImage::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $images;
 
-    public function __construct(int $bggId, string $name)
+    public function __construct(int $bggId, string $name, string $slug = '')
     {
         $this->bggId = $bggId;
         $this->name = $name;
+        $this->slug = $slug;
         $this->mechanics = new ArrayCollection();
         $this->domains = new ArrayCollection();
         $this->categories = new ArrayCollection();
@@ -104,6 +108,17 @@ class Game
     public function setName(string $name): self
     {
         $this->name = $name;
+        return $this;
+    }
+
+    public function getSlug(): string
+    {
+        return $this->slug;
+    }
+
+    public function setSlug(string $slug): self
+    {
+        $this->slug = $slug;
         return $this;
     }
 

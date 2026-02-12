@@ -80,7 +80,7 @@ final class AdminGameController
             return new JsonResponse(['error' => 'Un jeu avec ce bggId existe déjà'], Response::HTTP_CONFLICT);
         }
 
-        $game = new Game($bggId, $name);
+        $game = new Game($bggId, $name, $this->slugify($name, $bggId));
         $this->applyGameData($game, $data);
 
         $this->entityManager->persist($game);
@@ -228,5 +228,15 @@ final class AdminGameController
                 $this->entityManager->persist($image);
             }
         }
+    }
+
+    private function slugify(string $name, int $bggId): string
+    {
+        $base = strtolower(trim(preg_replace('/[^A-Za-z0-9]+/', '-', $name) ?? '', '-'));
+        if ($base === '') {
+            $base = 'game';
+        }
+
+        return $base . '-' . $bggId;
     }
 }

@@ -26,7 +26,7 @@ final class GameControllerTest extends AdminWebTestCase
 
     public function testShowReturnsGameWhenExists(): void
     {
-        $game = new Game(123, 'Catan');
+        $game = new Game(123, 'Catan', 'catan-123');
         $game->addImage(new GameImage('/img/catan.png', true));
         $this->entityManager->persist($game);
         $this->entityManager->flush();
