@@ -111,7 +111,6 @@ final class CheckoutController extends AbstractController
                 ],
             ]);
         } catch (\Throwable $e) {
-            // On évite d'exposer le message Stripe brut au client.
             return $this->json([
                 'error' => 'Une erreur est survenue lors de la création de la session de paiement.',
             ], Response::HTTP_BAD_GATEWAY);
