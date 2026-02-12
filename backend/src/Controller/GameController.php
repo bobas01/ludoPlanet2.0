@@ -67,6 +67,7 @@ final class GameController
         }
 
         return [
+            // try to get the game from the database with the slug
             'bggId' => $game->getBggId(),
             'slug' => $this->makeSlug($game),
             'name' => $game->getName(),
