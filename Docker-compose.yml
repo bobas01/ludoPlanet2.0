@@ -25,6 +25,7 @@ services:
       MAILER_DSN: smtp://mailpit:1025
     volumes:
       - backend_var:/app/var
+      - env_file:/app/.env:ro 
     depends_on:
       db:
         condition: service_healthy
@@ -49,3 +50,4 @@ services:
 volumes:
   db_data:
   backend_var:
+  env_file:
