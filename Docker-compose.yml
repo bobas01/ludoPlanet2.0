@@ -1,8 +1,8 @@
 services:
   db:
     image: mariadb:11
-    ports:
-      - "3307:3306"
+    # ports:
+    #   - "3307:3306"
     volumes:
       - ./database:/var/lib/mysql
     environment:
