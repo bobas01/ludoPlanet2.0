@@ -27,8 +27,8 @@ services:
       dockerfile: Dockerfile
     ports:
       - "3502:8000"
-    # volumes:
-    #   - ./backend/backend_data:/app
+    volumes:
+      - ./.env:/app/.env
     depends_on:
       - db
     networks:
