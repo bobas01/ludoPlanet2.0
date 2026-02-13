@@ -11,8 +11,7 @@ services:
       MYSQL_USER: root
       MYSQL_PASSWORD: root
     command: --wait_timeout=28800 --interactive_timeout=28800 --max_allowed_packet=64M
-    networks:
-      - dokploy-network
+    
   frontend:
     build:
       context: ./frontend
@@ -35,24 +34,19 @@ services:
       - ./.env:/app/.env
     depends_on:
       - db      
-    networks:
-      - dokploy-network
+    
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
     ports:
       - "8082:80"
     depends_on:
       - db
-    networks:
-      - dokploy-network  
+      
   mailpit:
     image: axllent/mailpit:latest
     ports:
       - "2525:1025"
       - "8025:8025"
-    networks:
-      - dokploy-network
+   
 
-networks:
-  dokploy-network:
-    external: true
+
