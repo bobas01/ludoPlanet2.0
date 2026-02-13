@@ -1,5 +1,5 @@
 services:
-  db:
+  dbMaster:
     image: mariadb:11
     # ports:
     #   - "3307:3306"
@@ -30,7 +30,7 @@ services:
     volumes:
       - ./.env:/app/.env
     depends_on:
-      - db
+      - dbMaster
     networks:
       - dokploy-network
   phpmyadmin:
@@ -38,7 +38,7 @@ services:
     ports:
       - "8082:80"
     depends_on:
-      - db
+      - dbMaster
     networks:
       - dokploy-network  
   mailpit:
