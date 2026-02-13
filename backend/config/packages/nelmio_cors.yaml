@@ -3,38 +3,38 @@ nelmio_cors:
     defaults:
         origin_regex: false
         allow_origin:
-            - 'http://localhost:5173'
-            - 'http://127.0.0.1:5173'
-            - 'http://localhost:4173'
-            - 'http://127.0.0.1:4173'
-            - 'http://72.60.189.212:3500'
-            - 'https://72.60.189.212:3500'
-            - 'http://72.60.189.212:3501'
-            - 'https://72.60.189.212:3501',
-            - 'http://72.60.189.212:3502'
-            - 'https://72.60.189.212:3502'
-            - 'http://72.60.189.212:3503'
-            - 'https://72.60.189.212:3503'
-        allow_methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS']
-        allow_headers: ['Content-Type', 'Authorization']
+            - "http://localhost:5173"
+            - "http://127.0.0.1:5173"
+            - "http://localhost:4173"
+            - "http://127.0.0.1:4173"
+            - "http://72.60.189.212:3500"
+            - "https://72.60.189.212:3500"
+            - "http://72.60.189.212:3501"
+            - "https://72.60.189.212:3501"
+            - "http://72.60.189.212:3502"
+            - "https://72.60.189.212:3502"
+            - "http://72.60.189.212:3503"
+            - "https://72.60.189.212:3503"
+        allow_methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
+        allow_headers: ["Content-Type", "Authorization"]
         allow_credentials: true
         max_age: 86400
     paths:
-        '^/':
+        "^/":
             allow_origin:
-                - 'http://localhost:5173'
-                - 'http://127.0.0.1:5173'
-                - 'http://localhost:4173'
-                - 'http://127.0.0.1:4173'
-                - 'http://72.60.189.212:3500'
-                - 'https://72.60.189.212:3500'
-                - 'http://72.60.189.212:3501'
-                - 'https://72.60.189.212:3501'
-                - 'http://72.60.189.212:3502'
-                - 'https://72.60.189.212:3502'
-                - 'http://72.60.189.212:3503'
-                - 'https://72.60.189.212:3503'
-            allow_headers: ['Content-Type', 'Authorization']
-            allow_methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS']
+                - "http://localhost:5173"
+                - "http://127.0.0.1:5173"
+                - "http://localhost:4173"
+                - "http://127.0.0.1:4173"
+                - "http://72.60.189.212:3500"
+                - "https://72.60.189.212:3500"
+                - "http://72.60.189.212:3501"
+                - "https://72.60.189.212:3501"
+                - "http://72.60.189.212:3502"
+                - "https://72.60.189.212:3502"
+                - "http://72.60.189.212:3503"
+                - "https://72.60.189.212:3503"
+            allow_headers: ["Content-Type", "Authorization"]
+            allow_methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
             allow_credentials: true
             max_age: 86400
