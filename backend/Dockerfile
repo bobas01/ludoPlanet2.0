@@ -1,5 +1,8 @@
 FROM php:8.4-fpm-alpine
 
+ENV APP_ENV=prod
+ENV APP_DEBUG=0
+
 RUN apk add --no-cache curl ca-certificates mariadb-dev && \
     docker-php-ext-install pdo_mysql && \
     curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
