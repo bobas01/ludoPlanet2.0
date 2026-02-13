@@ -1,8 +1,8 @@
 services:
   db:
     image: mariadb:11
-    ports:
-      - "3307:3306"
+    # ports:
+    #   - "3307:3306"
     volumes:
       - ./database:/var/lib/mysql
     environment:
@@ -18,7 +18,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     ports:
-      - "4173:4173"
+      - "3503:4173"
     depends_on:
       - backend
   backend:
@@ -26,9 +26,9 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     ports:
-      - "8000:8000"
-    volumes:
-      - ./backend:/app
+      - "3502:8000"
+    # volumes:
+    #   - ./backend/backend_data:/app
     depends_on:
       - db
     networks:
