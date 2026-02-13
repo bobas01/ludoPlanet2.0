@@ -17,6 +17,8 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      args:
+        - NO_CACHE=1
     ports:
       - "3503:4173"
     depends_on:
@@ -25,6 +27,8 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
+      args:
+        - NO_CACHE=1
     ports:
       - "3502:8000"
     volumes:
