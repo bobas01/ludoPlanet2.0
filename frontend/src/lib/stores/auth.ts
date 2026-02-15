@@ -35,11 +35,10 @@ const parseAuthError = (err: unknown): AuthError => {
 	if (typeof err === 'object' && err !== null && 'data' in err) {
 		const data = (err as { data?: unknown }).data;
 		if (data && typeof data === 'object' && 'error' in data) {
+			const d = data as { error: unknown; allowedSpecials?: unknown };
 			const allowedSpecials =
-				typeof (data as { allowedSpecials?: unknown }).allowedSpecials === 'string'
-					? (data as { allowedSpecials: string }).allowedSpecials
-					: undefined;
-			return { message: String((data as { error: string }).error), allowedSpecials };
+				typeof d.allowedSpecials === 'string' ? d.allowedSpecials : undefined;
+			return { message: String(d.error), allowedSpecials };
 		}
 	}
 	return { message: 'Erreur inconnue.' };
