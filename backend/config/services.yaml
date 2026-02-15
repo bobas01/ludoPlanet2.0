@@ -31,6 +31,10 @@ services:
             $frontendUrl: "%frontend_url%"
             $mailerFrom: "%mailer_from%"
 
+    App\Service\EmailHtmlRenderer:
+        arguments:
+            $frontendUrl: "%frontend_url%"
+
     App\EventSubscriber\RateLimitLoginSubscriber:
         arguments:
             $cache: "@cache.app"

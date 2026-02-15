@@ -11,6 +11,7 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use App\Service\EmailHtmlRenderer;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -25,6 +26,7 @@ final class RegisterController
         private readonly EntityManagerInterface $entityManager,
         private readonly UserPasswordHasherInterface $passwordHasher,
         private readonly MailerInterface $mailer,
+        private readonly EmailHtmlRenderer $emailHtml,
         #[Autowire('%mailer_from%')]
         private readonly string $mailerFrom,
         #[Autowire('%frontend_url%')]
@@ -108,18 +110,31 @@ final class RegisterController
 
         $verifyUrl = rtrim($this->frontendUrl, '/') . '/verify-email?token=' . $verificationToken;
 
+        $bodyHtml = '<p>Bonjour,</p>'
+            . '<p>Votre compte LudoPlanet a bien été créé.</p>'
+            . '<p>Pour confirmer votre adresse e-mail, cliquez sur le bouton ci-dessous (lien valide 24 h).</p>'
+            . '<p>Si vous n\'êtes pas à l\'origine de cette inscription, ignorez ce message.</p>'
+            . '<p>À bientôt sur LudoPlanet !</p>';
+
+        $html = $this->emailHtml->render([
+            'title' => 'Confirmez votre inscription',
+            'body' => $bodyHtml,
+            'ctaUrl' => $verifyUrl,
+            'ctaLabel' => 'Confirmer mon adresse e-mail',
+        ]);
+
+        $text = "Bonjour,\n\nVotre compte LudoPlanet a bien été créé.\n\n"
+            . "Pour confirmer votre adresse e-mail, cliquez sur le lien suivant (valide 24 h) :\n"
+            . $verifyUrl . "\n\n"
+            . "Si vous n'êtes pas à l'origine de cette inscription, ignorez ce message.\n\n"
+            . "À bientôt sur LudoPlanet !";
+
         $message = (new Email())
             ->from($this->mailerFrom)
             ->to($user->getEmail())
             ->subject('Confirmation de votre inscription — LudoPlanet')
-            ->text(
-                "Bonjour,\n\n"
-                . "Votre compte LudoPlanet a bien été créé.\n\n"
-                . "Pour confirmer votre adresse e-mail, cliquez sur le lien suivant (valide 24 h) :\n"
-                . $verifyUrl . "\n\n"
-                . "Si vous n'êtes pas à l'origine de cette inscription, ignorez ce message.\n\n"
-                . "À bientôt sur LudoPlanet !"
-            );
+            ->html($html)
+            ->text($text);
         $this->mailer->send($message);
 
         return new JsonResponse([

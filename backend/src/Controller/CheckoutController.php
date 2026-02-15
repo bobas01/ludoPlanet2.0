@@ -8,6 +8,7 @@ use App\Entity\Order;
 use App\Entity\OrderItem;
 use App\Repository\GameRepository;
 use App\Repository\OrderRepository;
+use App\Service\EmailHtmlRenderer;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -25,6 +26,7 @@ final class CheckoutController extends AbstractController
         private readonly GameRepository $gameRepository,
         private readonly Security $security,
         private readonly MailerInterface $mailer,
+        private readonly EmailHtmlRenderer $emailHtml,
         private readonly string $stripeSecretKey,
         private readonly string $stripeWebhookSecret,
         private readonly string $frontendUrl,
@@ -157,25 +159,48 @@ final class CheckoutController extends AbstractController
                     $user = $order->getUser();
                     if ($user !== null && $user->getEmail() !== '') {
                         $lines = [];
+                        $linesHtml = '';
                         foreach ($order->getItems() as $item) {
                             $game = $item->getGame();
-                            $lines[] = sprintf(
-                                '  - %s x %d : %s',
-                                $game?->getName() ?? 'Jeu',
-                                $item->getQuantity(),
-                                number_format($item->getUnitPriceCents() / 100, 2, ',', ' ') . ' €'
+                            $name = htmlspecialchars($game?->getName() ?? 'Jeu', \ENT_QUOTES, 'UTF-8');
+                            $qty = $item->getQuantity();
+                            $price = number_format($item->getUnitPriceCents() / 100, 2, ',', ' ') . ' €';
+                            $lines[] = sprintf('  - %s x %d : %s', $game?->getName() ?? 'Jeu', $qty, $price);
+                            $linesHtml .= sprintf(
+                                '<tr><td style="padding:8px 12px; border-bottom:1px solid #eee;">%s</td><td style="padding:8px 12px; border-bottom:1px solid #eee; text-align:center;">%d</td><td style="padding:8px 12px; border-bottom:1px solid #eee; text-align:right;">%s</td></tr>',
+                                $name,
+                                $qty,
+                                htmlspecialchars($price, \ENT_QUOTES, 'UTF-8')
                             );
                         }
-                        $body = "Votre commande n°" . $order->getId() . " a bien été enregistrée.\n\n"
+                        $total = number_format($order->getTotalCents() / 100, 2, ',', ' ') . ' €';
+                        $bodyHtml = '<p>Votre commande <strong>n°' . $order->getId() . '</strong> a bien été enregistrée et payée.</p>'
+                            . '<table role="presentation" width="100%" cellspacing="0" style="margin:16px 0; border-collapse:collapse; font-size:14px;">'
+                            . '<tr style="background:#f3f4f6;"><th style="padding:10px 12px; text-align:left;">Article</th><th style="padding:10px 12px; text-align:center;">Qté</th><th style="padding:10px 12px; text-align:right;">Prix</th></tr>'
+                            . $linesHtml
+                            . '<tr><td colspan="2" style="padding:12px; text-align:right; font-weight:bold;">Total</td><td style="padding:12px; text-align:right; font-weight:bold;">' . htmlspecialchars($total, \ENT_QUOTES, 'UTF-8') . '</td></tr>'
+                            . '</table>'
+                            . '<p>Merci pour votre achat, l\'équipe LudoPlanet.</p>';
+
+                        $html = $this->emailHtml->render([
+                            'title' => 'Confirmation de commande n°' . $order->getId(),
+                            'body' => $bodyHtml,
+                            'ctaUrl' => rtrim($this->frontendUrl, '/') . '/me',
+                            'ctaLabel' => 'Voir mon compte et mes commandes',
+                        ]);
+
+                        $bodyText = "Votre commande n°" . $order->getId() . " a bien été enregistrée.\n\n"
                             . "Détail :\n" . implode("\n", $lines) . "\n\n"
-                            . "Total : " . number_format($order->getTotalCents() / 100, 2, ',', ' ') . " €\n\n"
+                            . "Total : " . $total . "\n\n"
                             . "Merci pour votre achat, l'équipe LudoPlanet.";
+
                         $this->mailer->send(
                             (new Email())
                                 ->from($this->mailerFrom)
                                 ->to($user->getEmail())
                                 ->subject('Confirmation de commande n°' . $order->getId() . ' — LudoPlanet')
-                                ->text($body)
+                                ->html($html)
+                                ->text($bodyText)
                         );
                     }
                 }

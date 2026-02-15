@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller\Auth;
 
+use App\Service\EmailHtmlRenderer;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -22,6 +23,7 @@ final class ForgotPasswordController
         private readonly UserRepository $userRepository,
         private readonly EntityManagerInterface $entityManager,
         private readonly MailerInterface $mailer,
+        private readonly EmailHtmlRenderer $emailHtml,
         #[Autowire('%mailer_from%')]
         private readonly string $mailerFrom,
         #[Autowire('%frontend_url%')]
@@ -56,17 +58,30 @@ final class ForgotPasswordController
 
         $resetUrl = rtrim($this->frontendUrl, '/') . '/reset-password?token=' . $token;
 
+        $bodyHtml = '<p>Bonjour,</p>'
+            . '<p>Vous avez demandé la réinitialisation de votre mot de passe.</p>'
+            . '<p>Cliquez sur le bouton ci-dessous pour en choisir un nouveau (lien valide 1 heure).</p>'
+            . '<p>Si vous n\'êtes pas à l\'origine de cette demande, ignorez ce message.</p>'
+            . '<p>L\'équipe LudoPlanet</p>';
+
+        $html = $this->emailHtml->render([
+            'title' => 'Réinitialisation de votre mot de passe',
+            'body' => $bodyHtml,
+            'ctaUrl' => $resetUrl,
+            'ctaLabel' => 'Réinitialiser mon mot de passe',
+        ]);
+
+        $text = "Bonjour,\n\nVous avez demandé la réinitialisation de votre mot de passe.\n\n"
+            . "Cliquez sur le lien suivant (valide 1 heure) :\n" . $resetUrl . "\n\n"
+            . "Si vous n'êtes pas à l'origine de cette demande, ignorez ce message.\n\n"
+            . "L'équipe LudoPlanet";
+
         $message = (new Email())
             ->from($this->mailerFrom)
             ->to($user->getEmail())
             ->subject('Réinitialisation de votre mot de passe — LudoPlanet')
-            ->text(
-                "Bonjour,\n\n"
-                . "Vous avez demandé la réinitialisation de votre mot de passe.\n\n"
-                . "Cliquez sur le lien suivant (valide 1 heure) :\n" . $resetUrl . "\n\n"
-                . "Si vous n'êtes pas à l'origine de cette demande, ignorez ce message.\n\n"
-                . "L'équipe LudoPlanet"
-            );
+            ->html($html)
+            ->text($text);
         $this->mailer->send($message);
 
         return new JsonResponse(['message' => 'Si cet email est connu, un lien de réinitialisation a été envoyé.'], Response::HTTP_OK);
