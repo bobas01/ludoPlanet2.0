@@ -19,6 +19,6 @@ Thumbs.db
 !.env.test
 
 # CSV
-*.CSV
+ludoplanet.csv
 
 bgg_schema.sql

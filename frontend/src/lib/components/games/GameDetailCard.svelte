@@ -35,6 +35,11 @@
 	const resolvedImageUrl = $derived(resolveImageUrl(imageUrl));
 
 	let showCartAlert = $state(false);
+	let imageLoadError = $state(false);
+	$effect(() => {
+		resolvedImageUrl;
+		imageLoadError = false;
+	});
 
 	const handleAddToCart = () => {
 		addToCart(game, 1);
@@ -63,8 +68,13 @@
 		<div
 			class="flex h-48 min-h-64 items-center justify-center bg-linear-to-br from-[color:var(--brand-accent)]/15 via-[color:var(--brand-accent)]/5 to-slate-100 sm:h-full"
 		>
-			{#if resolvedImageUrl}
-				<img class="h-full w-full object-cover" src={resolvedImageUrl} alt={game.name} />
+			{#if resolvedImageUrl && !imageLoadError}
+				<img
+					class="h-full w-full object-cover"
+					src={resolvedImageUrl}
+					alt={game.name}
+					onerror={() => (imageLoadError = true)}
+				/>
 			{:else}
 				<span class="text-7xl opacity-80">🎲</span>
 			{/if}

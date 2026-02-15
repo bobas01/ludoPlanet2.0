@@ -46,7 +46,7 @@ final class AdminCategoryImageController
         }
 
         $projectDir = $this->kernel->getProjectDir();
-        $targetPath = $projectDir . '/backend/public/images/categories/' . self::ALLOWED_CATEGORIES[$slug];
+        $targetPath = $projectDir . '/public/images/categories/' . self::ALLOWED_CATEGORIES[$slug];
         $directory = \dirname($targetPath);
 
         if (!is_dir($directory) && !mkdir($directory, 0775, true) && !is_dir($directory)) {

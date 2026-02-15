@@ -4,6 +4,7 @@
 
 	let email = '';
 	let password = '';
+	let passwordConfirm = '';
 	let submitted = false;
 
 	const specialPattern = /[!@#$%^&*()_+\-=\[\]{};:'",.<>\/?\\|`~]/;
@@ -12,13 +13,15 @@
 	$: hasUppercase = /[A-Z]/.test(password);
 	$: hasSpecial = specialPattern.test(password);
 
+	$: passwordsMatch = password === passwordConfirm && passwordConfirm.length > 0;
+
 	const handleSubmit = async (event: Event) => {
 		event.preventDefault();
 		submitted = true;
+		if (password !== passwordConfirm) return;
 		const success = await register({ email, password });
 		if (success) {
-			// Après inscription, rediriger vers le profil avec un message d'aide pour le paiement
-			await goto('/me?from=register');
+			await goto('/?registered=1');
 		}
 	};
 </script>
@@ -68,6 +71,23 @@
 					</li>
 				</ul>
 			</div>
+			<div>
+				<label class="text-sm font-medium text-slate-700" for="register-password-confirm">
+					Confirmer le mot de passe
+				</label>
+				<input
+					class="mt-1 w-full rounded-md border px-3 py-2 text-sm {submitted && password !== passwordConfirm
+						? 'border-red-400'
+						: 'border-slate-300'}"
+					type="password"
+					id="register-password-confirm"
+					bind:value={passwordConfirm}
+					required
+				/>
+				{#if submitted && password !== passwordConfirm}
+					<p class="mt-1 text-xs text-red-600">Les deux mots de passe ne correspondent pas.</p>
+				{/if}
+			</div>
 		</div>
 
 		{#if $authError && submitted}
@@ -81,7 +101,7 @@
 
 		<button
 			type="submit"
-			disabled={$authLoading}
+			disabled={$authLoading || (submitted && password !== passwordConfirm)}
 			class="w-full rounded-md bg-amber-600 px-4 py-2 text-white hover:bg-amber-700 disabled:opacity-60"
 		>
 			{#if $authLoading}Création...{:else}Créer un compte{/if}

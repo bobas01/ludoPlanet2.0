@@ -23,6 +23,17 @@
 	<h1 class="text-2xl font-bold text-slate-800">Connexion</h1>
 	<p class="mt-2 text-sm text-slate-600">Connectez-vous pour accéder à votre compte.</p>
 
+	{#if $page.url.searchParams.get('verified') === '1'}
+		<p class="mt-4 rounded-md border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-800">
+			Votre adresse e-mail est confirmée. Vous pouvez vous connecter.
+		</p>
+	{/if}
+	{#if $page.url.searchParams.get('reset') === '1'}
+		<p class="mt-4 rounded-md border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-800">
+			Mot de passe mis à jour. Vous pouvez vous connecter.
+		</p>
+	{/if}
+
 	<form class="mt-6 space-y-4" onsubmit={handleSubmit}>
 		<div>
 			<label class="text-sm font-medium text-slate-700" for="login-email">Email</label>
@@ -35,7 +46,10 @@
 			/>
 		</div>
 		<div>
-			<label class="text-sm font-medium text-slate-700" for="login-password">Mot de passe</label>
+			<div class="flex items-center justify-between">
+				<label class="text-sm font-medium text-slate-700" for="login-password">Mot de passe</label>
+				<a href="/forgot-password" class="text-xs text-amber-700 hover:underline">Mot de passe oublié ?</a>
+			</div>
 			<div class="relative mt-1">
 				<input
 					class="w-full rounded-md border border-slate-300 px-3 py-2 pr-10 text-sm"

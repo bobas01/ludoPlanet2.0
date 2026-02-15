@@ -18,13 +18,17 @@ use Symfony\Component\Routing\Attribute\Route;
 
 final class RegisterController
 {
+    private const VERIFICATION_VALIDITY = '24 hours';
+
     public function __construct(
         private readonly UserRepository $userRepository,
         private readonly EntityManagerInterface $entityManager,
         private readonly UserPasswordHasherInterface $passwordHasher,
         private readonly MailerInterface $mailer,
         #[Autowire('%mailer_from%')]
-        private readonly string $mailerFrom
+        private readonly string $mailerFrom,
+        #[Autowire('%frontend_url%')]
+        private readonly string $frontendUrl
     ) {}
 
     #[Route('/api/register', name: 'api_register', methods: ['POST'])]
@@ -94,14 +98,28 @@ final class RegisterController
             $user->setBirthDate($birthDate);
         }
 
+        $verificationToken = bin2hex(random_bytes(32));
+        $verificationExpiresAt = new \DateTimeImmutable('+' . self::VERIFICATION_VALIDITY);
+        $user->setEmailVerificationToken($verificationToken);
+        $user->setEmailVerificationTokenExpiresAt($verificationExpiresAt);
+
         $this->entityManager->persist($user);
         $this->entityManager->flush();
+
+        $verifyUrl = rtrim($this->frontendUrl, '/') . '/verify-email?token=' . $verificationToken;
 
         $message = (new Email())
             ->from($this->mailerFrom)
             ->to($user->getEmail())
-            ->subject('Bienvenue sur LudoPlanet')
-            ->text('Votre compte est bien créé.');
+            ->subject('Confirmation de votre inscription — LudoPlanet')
+            ->text(
+                "Bonjour,\n\n"
+                . "Votre compte LudoPlanet a bien été créé.\n\n"
+                . "Pour confirmer votre adresse e-mail, cliquez sur le lien suivant (valide 24 h) :\n"
+                . $verifyUrl . "\n\n"
+                . "Si vous n'êtes pas à l'origine de cette inscription, ignorez ce message.\n\n"
+                . "À bientôt sur LudoPlanet !"
+            );
         $this->mailer->send($message);
 
         return new JsonResponse([

@@ -119,6 +119,15 @@ function splitList(?string $value): array
     return array_values(array_filter($items, static fn(string $item): bool => $item !== ''));
 }
 
+function makeSlug(string $name, int $bggId): string
+{
+    $base = strtolower(trim(preg_replace('/[^A-Za-z0-9]+/', '-', $name) ?? '', '-'));
+    if ($base === '') {
+        $base = 'game';
+    }
+    return $base . '-' . $bggId;
+}
+
 function deriveCategories(array $domains, ?float $complexity): array
 {
     $categories = [];
@@ -200,16 +209,17 @@ if (is_file($schemaPath)) {
 
 $insertGame = $pdo->prepare(
     'INSERT INTO games (
-        bgg_id, name, year_published, min_players, max_players, play_time,
+        bgg_id, name, slug, year_published, min_players, max_players, play_time,
         min_age, description, price_cents, users_rated, rating_average, bgg_rank,
         complexity_average, owned_users
     ) VALUES (
-        :bgg_id, :name, :year_published, :min_players, :max_players, :play_time,
+        :bgg_id, :name, :slug, :year_published, :min_players, :max_players, :play_time,
         :min_age, :description, :price_cents, :users_rated, :rating_average, :bgg_rank,
         :complexity_average, :owned_users
     )
     ON DUPLICATE KEY UPDATE
         name = VALUES(name),
+        slug = VALUES(slug),
         year_published = VALUES(year_published),
         min_players = VALUES(min_players),
         max_players = VALUES(max_players),
@@ -321,9 +331,13 @@ while (($row = fgetcsv($handle, 0, ';', '"', '\\')) !== false) {
         }
     }
 
+    $name = trim((string)$row[$index['Name']]);
+    $slug = makeSlug($name, $bggId);
+
     $insertGame->execute([
         ':bgg_id' => $bggId,
-        ':name' => trim((string)$row[$index['Name']]),
+        ':name' => $name,
+        ':slug' => $slug,
         ':year_published' => parseInt($row[$index['Year Published']] ?? null),
         ':min_players' => parseInt($row[$index['Min Players']] ?? null),
         ':max_players' => parseInt($row[$index['Max Players']] ?? null),

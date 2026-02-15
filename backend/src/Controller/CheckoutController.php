@@ -13,6 +13,8 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\Attribute\Route;
 
 final class CheckoutController extends AbstractController
@@ -22,9 +24,11 @@ final class CheckoutController extends AbstractController
         private readonly OrderRepository $orderRepository,
         private readonly GameRepository $gameRepository,
         private readonly Security $security,
+        private readonly MailerInterface $mailer,
         private readonly string $stripeSecretKey,
         private readonly string $stripeWebhookSecret,
-        private readonly string $frontendUrl
+        private readonly string $frontendUrl,
+        private readonly string $mailerFrom
     ) {}
 
     #[Route('/api/checkout/session', name: 'api_checkout_session', methods: ['POST'])]
@@ -149,6 +153,31 @@ final class CheckoutController extends AbstractController
                     $order->setStatus('paid');
                     $order->setUpdatedAt(new \DateTimeImmutable());
                     $this->entityManager->flush();
+
+                    $user = $order->getUser();
+                    if ($user !== null && $user->getEmail() !== '') {
+                        $lines = [];
+                        foreach ($order->getItems() as $item) {
+                            $game = $item->getGame();
+                            $lines[] = sprintf(
+                                '  - %s x %d : %s',
+                                $game?->getName() ?? 'Jeu',
+                                $item->getQuantity(),
+                                number_format($item->getUnitPriceCents() / 100, 2, ',', ' ') . ' €'
+                            );
+                        }
+                        $body = "Votre commande n°" . $order->getId() . " a bien été enregistrée.\n\n"
+                            . "Détail :\n" . implode("\n", $lines) . "\n\n"
+                            . "Total : " . number_format($order->getTotalCents() / 100, 2, ',', ' ') . " €\n\n"
+                            . "Merci pour votre achat, l'équipe LudoPlanet.";
+                        $this->mailer->send(
+                            (new Email())
+                                ->from($this->mailerFrom)
+                                ->to($user->getEmail())
+                                ->subject('Confirmation de commande n°' . $order->getId() . ' — LudoPlanet')
+                                ->text($body)
+                        );
+                    }
                 }
             }
         }

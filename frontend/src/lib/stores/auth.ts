@@ -112,12 +112,9 @@ export const register = async (payload: {
 	try {
 		loadingStore.set(true);
 		errorStore.set(null);
-		const { data } = await api.post<{ user: User }>('/api/register', payload);
-		userStore.set(data.user);
-		setSessionFlag();
+		await api.post<{ user: User }>('/api/register', payload);
 		return true;
 	} catch (err) {
-		userStore.set(null);
 		errorStore.set(parseAuthError(err));
 		return false;
 	} finally {
@@ -161,6 +158,48 @@ export const deleteMe = async () => {
 		userStore.set(null);
 	} catch (err) {
 		errorStore.set(parseAuthError(err));
+	} finally {
+		loadingStore.set(false);
+	}
+};
+
+export const forgotPassword = async (email: string): Promise<boolean> => {
+	try {
+		loadingStore.set(true);
+		errorStore.set(null);
+		await api.post('/api/forgot-password', { email });
+		return true;
+	} catch (err) {
+		errorStore.set(parseAuthError(err));
+		return false;
+	} finally {
+		loadingStore.set(false);
+	}
+};
+
+export const resetPassword = async (token: string, password: string): Promise<boolean> => {
+	try {
+		loadingStore.set(true);
+		errorStore.set(null);
+		await api.post('/api/reset-password', { token, password });
+		return true;
+	} catch (err) {
+		errorStore.set(parseAuthError(err));
+		return false;
+	} finally {
+		loadingStore.set(false);
+	}
+};
+
+export const verifyEmail = async (token: string): Promise<boolean> => {
+	try {
+		loadingStore.set(true);
+		errorStore.set(null);
+		await api.get(`/api/verify-email?token=${encodeURIComponent(token)}`);
+		return true;
+	} catch (err) {
+		errorStore.set(parseAuthError(err));
+		return false;
 	} finally {
 		loadingStore.set(false);
 	}

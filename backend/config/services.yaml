@@ -29,6 +29,7 @@ services:
             $stripeSecretKey: "%stripe_secret_key%"
             $stripeWebhookSecret: "%stripe_webhook_secret%"
             $frontendUrl: "%frontend_url%"
+            $mailerFrom: "%mailer_from%"
 
     App\EventSubscriber\RateLimitLoginSubscriber:
         arguments:

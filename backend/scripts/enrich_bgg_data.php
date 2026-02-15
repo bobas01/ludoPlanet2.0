@@ -142,19 +142,19 @@ function defaultImageForCategory(?string $category): string
     $normalized = $category ? mb_strtolower($category) : '';
 
     if (str_contains($normalized, 'enfant')) {
-        return '/images/categories/enfants.svg';
+        return '/images/categories/enfants.png';
     }
     if (str_contains($normalized, 'ambiance')) {
-        return '/images/categories/ambiance.svg';
+        return '/images/categories/ambiance.png';
     }
     if (str_contains($normalized, 'carte')) {
-        return '/images/categories/cartes.svg';
+        return '/images/categories/cartes.png';
     }
     if (str_contains($normalized, 'expert')) {
-        return '/images/categories/expert.svg';
+        return '/images/categories/expert.png';
     }
 
-    return '/images/categories/plateau.svg';
+    return '/images/categories/plateau.png';
 }
 
 $databaseUrl = getenv('DATABASE_URL');
