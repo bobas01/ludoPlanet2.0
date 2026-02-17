@@ -70,7 +70,7 @@
 			!$authUser.phoneNumber ||
 			!$authUser.birthDate;
 		if (missingProfile) {
-		goto('/me?from=checkout');
+			goto('/me?from=checkout');
 			return;
 		}
 		checkoutError = '';
@@ -207,7 +207,6 @@
 							{#if checkoutLoading}
 								Paiement en cours…
 							{:else}
-								<img src={iconCharriot} alt="" class="h-4 w-4" aria-hidden="true" />
 								Payer avec Stripe
 							{/if}
 						</Button>
