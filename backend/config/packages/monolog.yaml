@@ -44,7 +44,7 @@ when@prod:
                 path: php://stderr
                 level: debug
                 formatter: monolog.formatter.json
-           file:
+            file:
                 type: stream
                 path: "%kernel.logs_dir%/%kernel.environment%.log"
                 level: debug
