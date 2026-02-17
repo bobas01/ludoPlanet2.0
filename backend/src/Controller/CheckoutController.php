@@ -10,6 +10,7 @@ use App\Repository\GameRepository;
 use App\Repository\OrderRepository;
 use App\Service\EmailHtmlRenderer;
 use Doctrine\ORM\EntityManagerInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\Request;
@@ -27,6 +28,7 @@ final class CheckoutController extends AbstractController
         private readonly Security $security,
         private readonly MailerInterface $mailer,
         private readonly EmailHtmlRenderer $emailHtml,
+        private readonly LoggerInterface $logger,
         private readonly string $stripeSecretKey,
         private readonly string $stripeWebhookSecret,
         private readonly string $frontendUrl,
@@ -194,14 +196,22 @@ final class CheckoutController extends AbstractController
                             . "Total : " . $total . "\n\n"
                             . "Merci pour votre achat, l'équipe LudoPlanet.";
 
-                        $this->mailer->send(
-                            (new Email())
-                                ->from($this->mailerFrom)
-                                ->to($user->getEmail())
-                                ->subject('Confirmation de commande n°' . $order->getId() . ' — LudoPlanet')
-                                ->html($html)
-                                ->text($bodyText)
-                        );
+                        try {
+                            $this->mailer->send(
+                                (new Email())
+                                    ->from($this->mailerFrom)
+                                    ->to($user->getEmail())
+                                    ->subject('Confirmation de commande n°' . $order->getId() . ' — LudoPlanet')
+                                    ->html($html)
+                                    ->text($bodyText)
+                            );
+                        } catch (\Throwable $e) {
+                            $this->logger->error('Envoi email confirmation commande échoué', [
+                                'order_id' => $order->getId(),
+                                'email' => $user->getEmail(),
+                                'exception' => $e->getMessage(),
+                            ]);
+                        }
                     }
                 }
             }
