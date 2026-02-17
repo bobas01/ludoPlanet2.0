@@ -157,62 +157,7 @@ final class CheckoutController extends AbstractController
                     $order->setStatus('paid');
                     $order->setUpdatedAt(new \DateTimeImmutable());
                     $this->entityManager->flush();
-
-                    $user = $order->getUser();
-                    if ($user !== null && $user->getEmail() !== '') {
-                        $lines = [];
-                        $linesHtml = '';
-                        foreach ($order->getItems() as $item) {
-                            $game = $item->getGame();
-                            $name = htmlspecialchars($game?->getName() ?? 'Jeu', \ENT_QUOTES, 'UTF-8');
-                            $qty = $item->getQuantity();
-                            $price = number_format($item->getUnitPriceCents() / 100, 2, ',', ' ') . ' €';
-                            $lines[] = sprintf('  - %s x %d : %s', $game?->getName() ?? 'Jeu', $qty, $price);
-                            $linesHtml .= sprintf(
-                                '<tr><td style="padding:8px 12px; border-bottom:1px solid #eee;">%s</td><td style="padding:8px 12px; border-bottom:1px solid #eee; text-align:center;">%d</td><td style="padding:8px 12px; border-bottom:1px solid #eee; text-align:right;">%s</td></tr>',
-                                $name,
-                                $qty,
-                                htmlspecialchars($price, \ENT_QUOTES, 'UTF-8')
-                            );
-                        }
-                        $total = number_format($order->getTotalCents() / 100, 2, ',', ' ') . ' €';
-                        $bodyHtml = '<p>Votre commande <strong>n°' . $order->getId() . '</strong> a bien été enregistrée et payée.</p>'
-                            . '<table role="presentation" width="100%" cellspacing="0" style="margin:16px 0; border-collapse:collapse; font-size:14px;">'
-                            . '<tr style="background:#f3f4f6;"><th style="padding:10px 12px; text-align:left;">Article</th><th style="padding:10px 12px; text-align:center;">Qté</th><th style="padding:10px 12px; text-align:right;">Prix</th></tr>'
-                            . $linesHtml
-                            . '<tr><td colspan="2" style="padding:12px; text-align:right; font-weight:bold;">Total</td><td style="padding:12px; text-align:right; font-weight:bold;">' . htmlspecialchars($total, \ENT_QUOTES, 'UTF-8') . '</td></tr>'
-                            . '</table>'
-                            . '<p>Merci pour votre achat, l\'équipe LudoPlanet.</p>';
-
-                        $html = $this->emailHtml->render([
-                            'title' => 'Confirmation de commande n°' . $order->getId(),
-                            'body' => $bodyHtml,
-                            'ctaUrl' => rtrim($this->frontendUrl, '/') . '/me',
-                            'ctaLabel' => 'Voir mon compte et mes commandes',
-                        ]);
-
-                        $bodyText = "Votre commande n°" . $order->getId() . " a bien été enregistrée.\n\n"
-                            . "Détail :\n" . implode("\n", $lines) . "\n\n"
-                            . "Total : " . $total . "\n\n"
-                            . "Merci pour votre achat, l'équipe LudoPlanet.";
-
-                        try {
-                            $this->mailer->send(
-                                (new Email())
-                                    ->from($this->mailerFrom)
-                                    ->to($user->getEmail())
-                                    ->subject('Confirmation de commande n°' . $order->getId() . ' — LudoPlanet')
-                                    ->html($html)
-                                    ->text($bodyText)
-                            );
-                        } catch (\Throwable $e) {
-                            $this->logger->error('Envoi email confirmation commande échoué', [
-                                'order_id' => $order->getId(),
-                                'email' => $user->getEmail(),
-                                'exception' => $e->getMessage(),
-                            ]);
-                        }
-                    }
+                    $this->sendOrderConfirmationEmailIfNeeded($order);
                 }
             }
         }
@@ -238,7 +183,88 @@ final class CheckoutController extends AbstractController
             return $this->json(['error' => 'Commande non trouvée.'], Response::HTTP_NOT_FOUND);
         }
 
+        // Quand l'utilisateur arrive sur la page succès : vérifier le paiement Stripe et envoyer l'email si payé (sans dépendre du webhook).
+        try {
+            \Stripe\Stripe::setApiKey($this->stripeSecretKey);
+            $session = \Stripe\Checkout\Session::retrieve($sessionId);
+            if (isset($session->payment_status) && $session->payment_status === 'paid') {
+                if ($order->getStatus() === 'pending') {
+                    $order->setStatus('paid');
+                    $order->setUpdatedAt(new \DateTimeImmutable());
+                    $this->entityManager->flush();
+                }
+                $this->sendOrderConfirmationEmailIfNeeded($order);
+            }
+        } catch (\Throwable $e) {
+            $this->logger->warning('orderBySession: impossible de récupérer la session Stripe', ['session_id' => $sessionId, 'exception' => $e->getMessage()]);
+        }
+
         return $this->json(['order' => $this->orderToArray($order)]);
+    }
+
+    private function sendOrderConfirmationEmailIfNeeded(Order $order): void
+    {
+        if ($order->getConfirmationEmailSentAt() !== null) {
+            return;
+        }
+        $user = $order->getUser();
+        if ($user === null || $user->getEmail() === '') {
+            return;
+        }
+        $lines = [];
+        $linesHtml = '';
+        foreach ($order->getItems() as $item) {
+            $game = $item->getGame();
+            $name = htmlspecialchars($game?->getName() ?? 'Jeu', \ENT_QUOTES, 'UTF-8');
+            $qty = $item->getQuantity();
+            $price = number_format($item->getUnitPriceCents() / 100, 2, ',', ' ') . ' €';
+            $lines[] = sprintf('  - %s x %d : %s', $game?->getName() ?? 'Jeu', $qty, $price);
+            $linesHtml .= sprintf(
+                '<tr><td style="padding:8px 12px; border-bottom:1px solid #eee;">%s</td><td style="padding:8px 12px; border-bottom:1px solid #eee; text-align:center;">%d</td><td style="padding:8px 12px; border-bottom:1px solid #eee; text-align:right;">%s</td></tr>',
+                $name,
+                $qty,
+                htmlspecialchars($price, \ENT_QUOTES, 'UTF-8')
+            );
+        }
+        $total = number_format($order->getTotalCents() / 100, 2, ',', ' ') . ' €';
+        $bodyHtml = '<p>Votre commande <strong>n°' . $order->getId() . '</strong> a bien été enregistrée et payée.</p>'
+            . '<table role="presentation" width="100%" cellspacing="0" style="margin:16px 0; border-collapse:collapse; font-size:14px;">'
+            . '<tr style="background:#f3f4f6;"><th style="padding:10px 12px; text-align:left;">Article</th><th style="padding:10px 12px; text-align:center;">Qté</th><th style="padding:10px 12px; text-align:right;">Prix</th></tr>'
+            . $linesHtml
+            . '<tr><td colspan="2" style="padding:12px; text-align:right; font-weight:bold;">Total</td><td style="padding:12px; text-align:right; font-weight:bold;">' . htmlspecialchars($total, \ENT_QUOTES, 'UTF-8') . '</td></tr>'
+            . '</table>'
+            . '<p>Merci pour votre achat, l\'équipe LudoPlanet.</p>';
+
+        $html = $this->emailHtml->render([
+            'title' => 'Confirmation de commande n°' . $order->getId(),
+            'body' => $bodyHtml,
+            'ctaUrl' => rtrim($this->frontendUrl, '/') . '/me',
+            'ctaLabel' => 'Voir mon compte et mes commandes',
+        ]);
+
+        $bodyText = "Votre commande n°" . $order->getId() . " a bien été enregistrée.\n\n"
+            . "Détail :\n" . implode("\n", $lines) . "\n\n"
+            . "Total : " . $total . "\n\n"
+            . "Merci pour votre achat, l'équipe LudoPlanet.";
+
+        try {
+            $this->mailer->send(
+                (new Email())
+                    ->from($this->mailerFrom)
+                    ->to($user->getEmail())
+                    ->subject('Confirmation de commande n°' . $order->getId() . ' — LudoPlanet')
+                    ->html($html)
+                    ->text($bodyText)
+            );
+            $order->setConfirmationEmailSentAt(new \DateTimeImmutable());
+            $this->entityManager->flush();
+        } catch (\Throwable $e) {
+            $this->logger->error('Envoi email confirmation commande échoué', [
+                'order_id' => $order->getId(),
+                'email' => $user->getEmail(),
+                'exception' => $e->getMessage(),
+            ]);
+        }
     }
 
     /**

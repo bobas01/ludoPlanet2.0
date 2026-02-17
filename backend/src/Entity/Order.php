@@ -55,6 +55,9 @@ class Order
     #[ORM\Column(name: 'stripe_session_id', type: 'string', length: 255, nullable: true)]
     private ?string $stripeSessionId = null;
 
+    #[ORM\Column(name: 'confirmation_email_sent_at', type: 'datetime_immutable', nullable: true)]
+    private ?\DateTimeImmutable $confirmationEmailSentAt = null;
+
     #[ORM\Column(name: 'created_at', type: 'datetime_immutable')]
     private \DateTimeImmutable $createdAt;
 
@@ -206,6 +209,17 @@ class Order
     public function setStripeSessionId(?string $stripeSessionId): self
     {
         $this->stripeSessionId = $stripeSessionId;
+        return $this;
+    }
+
+    public function getConfirmationEmailSentAt(): ?\DateTimeImmutable
+    {
+        return $this->confirmationEmailSentAt;
+    }
+
+    public function setConfirmationEmailSentAt(?\DateTimeImmutable $confirmationEmailSentAt): self
+    {
+        $this->confirmationEmailSentAt = $confirmationEmailSentAt;
         return $this;
     }
 
