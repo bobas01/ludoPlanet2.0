@@ -38,14 +38,18 @@ when@prod:
                 handler: nested
                 excluded_http_codes: [404, 405]
                 channels: ["!deprecation"]
-                buffer_size: 50 # How many messages should be saved? Prevent memory leaks
+                buffer_size: 50
             nested:
                 type: stream
                 path: php://stderr
                 level: debug
                 formatter: monolog.formatter.json
+           file:
+                type: stream
+                path: "%kernel.logs_dir%/%kernel.environment%.log"
+                level: debug
+                channels: ["!event", "!doctrine"]
             console:
                 type: console
                 process_psr_3_messages: false
                 channels: ["!event", "!doctrine", "!deprecation"]
-            # Pas de handler "deprecation" en prod : évite le bruit Doctrine "MySQL < 8 deprecated" (MariaDB 10)
