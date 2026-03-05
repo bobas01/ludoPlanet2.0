@@ -31,6 +31,8 @@ export type OrderItem = {
 export type Order = {
 	id: number;
 	user_id: number | null;
+	user_email: string | null;
+	user_full_name: string | null;
 	status: string;
 	total_cents: number;
 	currency: string;

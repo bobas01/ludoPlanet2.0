@@ -49,7 +49,7 @@
 								<tr class="border-b border-slate-100 hover:bg-slate-50/60">
 									<td class="px-3 py-2 align-middle text-slate-700">#{order.id}</td>
 									<td class="px-3 py-2 align-middle text-slate-700">
-										{order.shipping.full_name ?? '—'}
+										{order.user_full_name ?? order.shipping.full_name ?? order.user_email ?? '—'}
 									</td>
 									<td class="px-3 py-2 align-middle text-slate-700">{order.status}</td>
 									<td class="px-3 py-2 text-right align-middle text-slate-700">
@@ -71,7 +71,7 @@
 								Commande #{order.id}
 							</p>
 							<p class="mt-1 text-sm font-semibold text-slate-900">
-								{order.shipping.full_name ?? '—'}
+								{order.user_full_name ?? order.shipping.full_name ?? order.user_email ?? '—'}
 							</p>
 							<p class="mt-0.5 text-xs text-slate-600">Statut&nbsp;: {order.status}</p>
 							<p class="mt-0.5 text-xs text-slate-600">

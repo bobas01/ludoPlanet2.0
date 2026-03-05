@@ -328,9 +328,22 @@ final class OrderController
      */
     private function orderToArray(Order $order): array
     {
+        $user = $order->getUser();
+        $userFullName = null;
+        if ($user !== null) {
+            $firstName = method_exists($user, 'getFirstName') ? $user->getFirstName() : null;
+            $lastName = method_exists($user, 'getLastName') ? $user->getLastName() : null;
+            $parts = array_filter([$firstName, $lastName], static fn($v) => $v !== null && $v !== '');
+            if ($parts !== []) {
+                $userFullName = implode(' ', $parts);
+            }
+        }
+
         return [
             'id' => $order->getId(),
-            'user_id' => $order->getUser()?->getId(),
+            'user_id' => $user?->getId(),
+            'user_email' => $user?->getEmail(),
+            'user_full_name' => $userFullName,
             'status' => $order->getStatus(),
             'total_cents' => $order->getTotalCents(),
             'currency' => $order->getCurrency(),
