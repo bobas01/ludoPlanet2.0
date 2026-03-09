@@ -155,6 +155,8 @@ export const deleteMe = async () => {
 		await api.delete('/api/me');
 		clearSessionFlag();
 		userStore.set(null);
+		// On laisse la redirection et le message de succès au composant qui appelle deleteMe.
+		// Ici on se contente de « nettoyer » la session.
 	} catch (err) {
 		errorStore.set(parseAuthError(err));
 	} finally {

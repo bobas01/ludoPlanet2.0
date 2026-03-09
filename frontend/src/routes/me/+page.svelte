@@ -55,7 +55,9 @@
 	const handleDelete = async () => {
 		const confirmed = confirm('Confirmer la suppression du compte ? Cette action est définitive.');
 		if (!confirmed) return;
-		await deleteMe();
+	await deleteMe();
+	alert('Votre compte a bien été supprimé.');
+	await goto('/');
 	};
 
 	const handleTabSelect = (tab: 'profile' | 'orders') => {
