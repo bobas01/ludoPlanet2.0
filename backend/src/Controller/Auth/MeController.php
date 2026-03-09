@@ -164,14 +164,17 @@ final class MeController
             return new JsonResponse(['error' => 'Unauthorized'], Response::HTTP_UNAUTHORIZED);
         }
 
-        try {
-            $this->entityManager->remove($user);
-            $this->entityManager->flush();
-        } catch (\Throwable) {
-            return new JsonResponse([
-                'error' => 'Suppression impossible. Veuillez contacter le support.',
-            ], Response::HTTP_CONFLICT);
-        }
+        $anonymousEmail = sprintf(
+            'deleted+%s@ludoplanet.local',
+            $user->getId() !== null ? (string) $user->getId() : bin2hex(random_bytes(6))
+        );
+
+        $user
+            ->setEmail($anonymousEmail)
+            ->setRoles([])
+            ->setPasswordHash(bin2hex(random_bytes(32)));
+
+        $this->entityManager->flush();
 
         $response = new JsonResponse(['ok' => true]);
         $response->headers->setCookie(new Cookie(
