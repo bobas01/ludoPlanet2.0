@@ -1,7 +1,7 @@
-import tailwindcss from '@tailwindcss/vite';
-import { defineConfig } from 'vitest/config';
-import { playwright } from '@vitest/browser-playwright';
 import { sveltekit } from '@sveltejs/kit/vite';
+import tailwindcss from '@tailwindcss/vite';
+import { playwright } from '@vitest/browser-playwright';
+import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
 	plugins: [tailwindcss(), sveltekit()],
@@ -9,7 +9,7 @@ export default defineConfig({
 		noExternal: ['bits-ui']
 	},
 	preview: {
-        allowedHosts: ['ludoplanet-compose-0zfcqz-c9c605-72-60-189-212.traefik.me']
+		allowedHosts: ['lp.alseqdev.cloud']
     },
 	test: {
 		expect: { requireAssertions: true },
