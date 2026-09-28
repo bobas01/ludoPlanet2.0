@@ -9,8 +9,10 @@ export default defineConfig({
 		noExternal: ['bits-ui']
 	},
 	preview: {
+		host: true,
+		port: 4173,
 		allowedHosts: ['lp.alseqdev.cloud']
-    },
+	  },
 	test: {
 		expect: { requireAssertions: true },
 
