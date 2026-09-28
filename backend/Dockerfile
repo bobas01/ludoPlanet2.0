@@ -15,6 +15,11 @@ RUN composer install --no-dev --no-scripts --no-autoloader --ignore-platform-req
 
 COPY . .
 
+# Symfony lit /app/.env au démarrage. Dokploy injecte les variables via env_file
+# sans copier ce fichier (il est ignoré par git). Un fichier vide suffit :
+# les variables déjà présentes dans l'environnement ne sont pas écrasées.
+RUN if [ ! -f .env ]; then touch .env; fi && chmod a+r .env
+
 RUN composer dump-autoload --optimize --no-dev
 
 EXPOSE 8000
