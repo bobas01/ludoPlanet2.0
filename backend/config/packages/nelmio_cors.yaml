@@ -16,6 +16,8 @@ nelmio_cors:
             - "http://72.60.189.212:3503"
             - "https://72.60.189.212:3503"
             - "https://lp.alseqdev.cloud"
+            - "https://api.lp.alseqdev.cloud"
+            - "https://www.lp.alseqdev.cloud"
         allow_methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
         allow_headers: ["Content-Type", "Authorization"]
         allow_credentials: true
@@ -36,6 +38,8 @@ nelmio_cors:
                 - "http://72.60.189.212:3503"
                 - "https://72.60.189.212:3503"
                 - "https://lp.alseqdev.cloud"
+                - "https://api.lp.alseqdev.cloud"
+                - "https://www.lp.alseqdev.cloud"
             allow_headers: ["Content-Type", "Authorization"]
             allow_methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
             allow_credentials: true
