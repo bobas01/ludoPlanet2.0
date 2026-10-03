@@ -11,7 +11,7 @@ export default defineConfig({
 	preview: {
 		host: true,
 		port: 4173,
-		allowedHosts: ['lp.alseqdev.cloud']
+		allowedHosts: ['lp.alseqdev.cloud','www.lp.alseqdev.cloud']
 	  },
 	test: {
 		expect: { requireAssertions: true },
